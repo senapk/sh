@@ -8,29 +8,38 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
+#include <stdio.h>
+#include <inttypes.h>
 
-#define SH_MAX_ITENS 1000 //max array itens
+#define X_MAX_ITENS 1000 //max array itens
 
 //macro to create a color
-#define sh_make_color(r, g, b, a) (SDL_Color){r, g, b, a}
+#define x_color_make(r, g, b, a) (SDL_Color){r, g, b, a}
 
 //macro to create a rect
-#define sh_make_rect(x, y, w, h)  (SDL_Rect){x, y, w, h}
+#define x_rect_make(x, y, w, h)  (SDL_Rect){x, y, w, h}
+
+#define x_v2d_make(x, y)         (x_V2d){x, y}
+
+//swap two variables
+#define X_SWAP(x, y, T) do { T X_SWAP = x; x = y; y = X_SWAP; } while (0)
+
 
 /* lista de cores default */
-extern const SDL_Color sh_COLOR_RED;
-extern const SDL_Color sh_COLOR_GREEN;
-extern const SDL_Color sh_COLOR_BLUE;
-extern const SDL_Color sh_COLOR_YELLOW;
-extern const SDL_Color sh_COLOR_CYAN;
-extern const SDL_Color sh_COLOR_MAGENTA;
-extern const SDL_Color sh_COLOR_ORANGE;
-extern const SDL_Color sh_COLOR_VIOLET;
-extern const SDL_Color sh_COLOR_WHITE;
-extern const SDL_Color sh_COLOR_BLACK;
+extern const SDL_Color X_COLOR_RED;
+extern const SDL_Color X_COLOR_GREEN;
+extern const SDL_Color X_COLOR_BLUE;
+extern const SDL_Color X_COLOR_YELLOW;
+extern const SDL_Color X_COLOR_CYAN;
+extern const SDL_Color X_COLOR_MAGENTA;
+extern const SDL_Color X_COLOR_ORANGE;
+extern const SDL_Color X_COLOR_VIOLET;
+extern const SDL_Color X_COLOR_WHITE;
+extern const SDL_Color X_COLOR_BLACK;
 
 //enumeration to Events handled
-typedef enum {sh_EVQUIT = 1, sh_EVLEFTCLICK = 2, sh_EVRIGHTCLICK = 3} sh_EventType;
+typedef enum {X_EVENT_NOTHING = -1, X_EVENT_QUIT = 0, X_EVENT_LEFTCLICK = 1, X_EVENT_RIGHTCLICK = 2} x_EventType;
 
 //struct to store Textures and informations about sprites
 typedef struct{
@@ -38,128 +47,140 @@ typedef struct{
     int width, height; //image size on screen
     int nl, nc;        //number of lines, number of columns, 
     int w_one, h_one;  //source size for one image
-}sh_Sprite;
+}x_Sprite;
 
 //global var of store Window
-extern SDL_Window   * sh_window;
+extern SDL_Window   * x_window;
 
 //global var to store renderer
-extern SDL_Renderer * sh_renderer;
+extern SDL_Renderer * x_renderer;
 
 //global array to store fonts
-extern TTF_Font    * sh_arr_fonts[SH_MAX_ITENS];
+extern TTF_Font    * x_arr_fonts[X_MAX_ITENS];
 
 //global array to store sprites
-extern sh_Sprite   * sh_arr_sprites[SH_MAX_ITENS];
+extern x_Sprite   * x_arr_sprites[X_MAX_ITENS];
 
 //global array to store sounds
-extern Mix_Chunk   * sh_arr_chunks[SH_MAX_ITENS];
+extern Mix_Chunk   * x_arr_chunks[X_MAX_ITENS];
 
 //global array to store musics
-extern Mix_Music   * sh_arr_musics[SH_MAX_ITENS];
+extern Mix_Music   * x_arr_musics[X_MAX_ITENS];
 
 //global array to store colors
-extern SDL_Color     sh_arr_colors[256];
+extern SDL_Color     x_arr_colors[256];
 
 //global var to store window width
-extern int sh_window_width;
+extern int x_window_width;
 
 //global var to store window height
-extern int sh_window_height;
+extern int x_window_height;
 
 //default font hardcoded in the end of this file to be used as a default font
-extern unsigned char __sh_font_buffer_profont[46628];
+extern unsigned char __x_font_buffer_profont[46628];
 
 //initializes the window and the renderer
-//global var sh_window will store the window
-//global var sh_renderer will store the renderer
-//globals sh_window_height e sh_window_width will store the window dimensions
-void sh_init(int width, int height);
+//global var x_window will store the window
+//global var x_renderer will store the renderer
+//globals x_window_height e x_window_width will store the window dimensions
+void x_open(int width, int height, const char * title);
 
-//finalizes the sdl and all resources alocated
-void sh_quit();
+//finalizes the sdl and all resources allocated
+void x_close();
 
 //clear the screen
-#define sh_clear()                   SDL_RenderClear(sh_renderer);
+void x_clear();
 
 //show all objects drawed
-#define sh_display()                 SDL_RenderPresent(sh_renderer);
+void x_display();
 
 //plots a pixel in screen using the default color
-void sh_plot(int x, int y);
+void x_plot(int x, int y);
 
 //write in the screen using the default color
 //x and y are the destination point
 //use format as the printf format
-void sh_write(int x, int y, const char * format, ...);
-
-//changes the color used do paint and write using the color palette
-void sh_color_load(Uint8 color);
-
-//saves a color in index palette
-void sh_color_save(Uint8 index, int r, int g, int b, int a);
+void x_write(int x, int y, const char * format, ...);
 
 //changes the color used do paint and write
-void sh_color_set(int r, int g, int b, int a);
+void x_color_set(SDL_Color color);
 
-/* //stores a TTF font in sh_arr_fonts and return the index. 
-int  sh_font_save(const char * path, int size);
+//changes the color used do paint and write using the color palette
+void x_color_change(Uint8 color);
 
-//selects a font from sh_arr_fonts to use in sh_write.
+//get the current color used do paint and write
+SDL_Color x_color_get();
+
+//saves a color in index palette
+void x_palette_set(Uint8 index, int r, int g, int b, int a);
+
+//get a color from palette
+SDL_Color x_palette_get(Uint8 index);
+
+/* //stores a TTF font in x_arr_fonts and return the index. 
+int  x_font_save(const char * path, int size);
+
+//selects a font from x_arr_fonts to use in x_write.
 //use 0 for default font
-void sh_font_load(int index); */
+void x_font_load(int index); */
 
 //changes font size
-void sh_font_set_size(int size);
+void x_font_size(int size);
 
-//stores a SDL_Texture in sh_arr_sprites and return the index.
-//the struct sh_Sprite store informations about the number of images in the sprite
+//stores a SDL_Texture in x_arr_sprites and return the index.
+//the struct x_Sprite store informations about the number of images in the sprite
 //and the dimensions os a single image
 //nl e nc are the number of lines and columns in a multi image file
 //if there is a single image, use nl = nc = 1
 //width and height are the output dimensions 
-int sh_sprite_save(const char * path, int nl, int nc, int width, int height);
+int x_sprite_load(const char * path, int nl, int nc, int width, int height);
 
 //draw the sprite on screen
 //if is a multi image sprite, use subindex to select the image to be displayed
 //in a single image, use subindex == 0
-void sh_sprite_draw(int index, int subindex, int x, int y);
+void x_sprite_draw(int index, int subindex, int x, int y);
 
 //draw the image using a rotation angle in degrees
 //flip value can be SDL_FLIP_HORIZONTAL, SDL_FLIP_VERTICAL or SDL_FLIP_NONE
-void sh_sprite_draw_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip);
+void x_sprite_draw_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip);
 
 //returns the source rect in the texture select by index using.
-SDL_Rect sh_sprite_get_rect_source(int index, int subindex);
+SDL_Rect x_sprite_get_rect_source(int index, int subindex);
 
-//stores a Mix_Chunk in sh_arr_sounds and return the index. 
-int  sh_sound_save(const char * path);
+//stores a Mix_Chunk in x_arr_sounds and return the index. 
+int  x_sound_load(const char * path);
 
 //play the sound once for loops == 0
 //use loop > 0 to repeat sound
-void sh_sound_play(int index, int loops);
+void x_sound_play(int index, int loops);
 
-//stores the Mix_Music in sh_arr_musics and return the index. 
-int  sh_music_save(const char * path);
+//stores the Mix_Music in x_arr_musics and return the index. 
+int  x_music_load(const char * path);
 
 //play and resume the music
-void sh_music_toggle_play(int index);
+void x_music_toggle_play(int index);
 
 //controls a timer
-//if the amount of time was passed, the function returns true and the time is updated
-bool sh_timer(int * timer, int time);
+//if the amount of time in milisseconds was passed, the function returns true and the time is updated
+bool x_timer(int * timer, int ms);
 
-//discarts all events in pool until find one of these events:
-//if a SDL_KEYDOWN event was found, returns the SDL Keycode
-//if a SLD_QUIT event was found, returns sh_EVQUIT == 1
-//if a SDL_MOUSEBUTTONDOWN was found, returns sh_EVLEFTCLICK == 2 or sh_EVRIGHTCLICK == 3
-int sh_input_get();
+//sleep for this amount of time in milisseconds
+void x_delay(int ms);
+
+//discarts all events in pool until find one of these events
+//fills the event with one of the following alternatives
+//if a SDL_KEYDOWN event was found, event receives the SDL Keycode
+//if a SLD_QUIT event was found, event receives X_EVENT_QUIT (0)
+//if a SDL_MOUSEBUTTONDOWN was found, event receives X_EVENT_LEFTCLICK (1) or X_EVENT_RIGHTCLICK (2)
+//if none of these events was found, event receives X_EVENT_NOTHING (-1)
+//if var event is no NULL, it is filled with event found
+int x_has_events(int * event);
 
 //receive a SDLK_Key returns if the key is pressed
-bool sh_input_is_key_pressed(int key);
+bool x_is_key_pressed(int key);
 
 //returns the actual mouse position
-void sh_input_get_mouse_pos(int * x, int * y);
+void x_get_mouse_pos(int * x, int * y);
 
 /*
 ###############################################
@@ -171,28 +192,28 @@ void sh_input_get_mouse_pos(int * x, int * y);
 typedef struct{
     float x;
     float y;
-} sh_V2d;
+} x_V2d;
 
 /* retorna o tamanho de um vetor da origem */
-float sh_v2d_lenght(float x, float y);
+float x_v2d_lenght(float x, float y);
 
 /* retorna a distancia entre dois pontos */
-float sh_v2d_distance(float ax, float ay, float bx, float by);
+float x_v2d_distance(float ax, float ay, float bx, float by);
 
 /* retorna a + b */
-sh_V2d sh_v2d_sum(sh_V2d a, sh_V2d b);
+x_V2d x_v2d_sum(x_V2d a, x_V2d b);
 
 /* retorna a - b */
-sh_V2d sh_v2d_sub(sh_V2d a, sh_V2d b);
+x_V2d x_v2d_sub(x_V2d a, x_V2d b);
 
 /* retorna (a.x * value, a.y * value) */
-sh_V2d sh_v2d_dot(sh_V2d a, float value);
+x_V2d x_v2d_dot(x_V2d a, float value);
 
 /* retorna o vetor normalizado */
-sh_V2d sh_v2d_normalize(sh_V2d v);
+x_V2d x_v2d_normalize(x_V2d v);
 
 /* retorna o vetor orthogonal */
-sh_V2d sh_v2d_ortho(sh_V2d v);
+x_V2d x_v2d_ortho(x_V2d v);
 
 /* ############################################### */
 /* ############ FUNÇÕES DE DESENHO DE LINHAS ##### */
@@ -201,24 +222,24 @@ sh_V2d sh_v2d_ortho(sh_V2d v);
 /* Desenha as seguintes formas sem preenchimento */
 
 /* desenha uma linha com espessura de 1 pixel entre os pontos (x0, y0) e (x1, y1) */
-void sh_draw_line(int x0, int y0, int x1, int y1);
+void x_draw_line(int x0, int y0, int x1, int y1);
 
 /* desenha um quadrado */
-void sh_draw_square(int x, int y, int side);
+void x_draw_square(int x, int y, int side);
 
 /* desenha um retangulo dados os cantos superior esquerdo (x0, y0) e inferior direito (x1, y1) */
-void sh_draw_rect(int x0, int y0, int x1, int y1);
+void x_draw_rect(int x0, int y0, int x1, int y1);
 
 /* desenha um circulo com centro (centerx, centerx) e raio radius */
-void sh_draw_circle(int centerx, int centery, int radius);
+void x_draw_circle(int centerx, int centery, int radius);
 
 /* desenha uma elipse dentro do rect de ponto superior esquerdo(x0, y0) */
 /* e ponto inferior direito (x1, y1) */
-void sh_draw_ellipse(int x0, int y0, int x1, int y1);
+void x_draw_ellipse(int x0, int y0, int x1, int y1);
 
 /* desenha uma curva de bezier entre os pontos (x0, y0) e (x2, y2) */
 /* a curvatura eh dada pelo ponto (x1, y1) */
-void sh_draw_bezier(int x0, int y0, int x1, int y1, int x2, int y2);
+void x_draw_bezier(int x0, int y0, int x1, int y1, int x2, int y2);
 
 
 /* ############################################### */
@@ -226,30 +247,28 @@ void sh_draw_bezier(int x0, int y0, int x1, int y1, int x2, int y2);
 /* ############################################### */
 
 /* desenha uma linha com espessura de thickness pixels entre os pontos (x0, y0) e (x1, y1) */
-void sh_fill_line(float x0, float y0, float x1, float y1, int thickness);
+void x_fill_line(float x0, float y0, float x1, float y1, int thickness);
 
 /* desenha um arco dado o ponto de centro, raio, espessura */
-/* o angulo de inicio e o angulo de fim */
-/* o angulo de inicio deve ser sempre menor que o angulo de fim */
-/* o desenho é feito no sentido anti horario */
-/* o angulo pode superar 360 */
-void sh_fill_arc(float centerx, float centery, int radius, int thickness, int degrees_begin, int degrees_end);
+/* o angulo de inicio e o comprimento do arco em graus */
+/* ambos os valores de ângulo podem ser negativos */
+void x_fill_arc(float centerx, float centery, int radius, int thickness, int degrees_begin, int degrees_lenght);
 
 /* desenha um triangulo dados os 3 vertices */
-void sh_fill_triangle(float v1x, float v1y, float v2x, float v2y, float v3x, float v3y);
+void x_fill_triangle(float v1x, float v1y, float v2x, float v2y, float v3x, float v3y);
 
 /* desenha um quadrado preenchido */
-void sh_fill_square(int x, int y, int side);
+void x_fill_square(int x, int y, int side);
 
 /* desenha um retangulo dados os cantos superior esquerdo (x0, y0) e inferior direito (x1, y1) */
-void sh_fill_rect(int x0, int y0, int x1, int y1);
+void x_fill_rect(int x0, int y0, int x1, int y1);
 
 /* desenha um circulo dado centro e raio */
-void sh_fill_circle(int centerx, int centery, int radius);
+void x_fill_circle(int centerx, int centery, int radius);
 
 /* desenha uma elipse dentro do rect de ponto superior esquerdo(x0, y0) */
 /* e ponto inferior direito (x1, y1) */
-void sh_fill_ellipse(int x0, int y0, int x1, int y1);
+void x_fill_ellipse(int x0, int y0, int x1, int y1);
 
 /*
 ###############################################
@@ -260,62 +279,72 @@ void sh_fill_ellipse(int x0, int y0, int x1, int y1);
 /*Init the grid*/
 /*side is the size of the cell */
 /*sep the space in black between cells */
-void sh_grid_init(int side, int sep);
+void x_grid_init(int side, int sep);
 
 /*plots a square in cell*/
-void sh_grid_splot(int l, int c);
+void x_grid_square(int l, int c);
 
 /*plots a circle in cell*/
-void sh_grid_cplot(int l, int c);
+void x_grid_circle(int l, int c);
 
 /*writes a text until 5 char in cell*/
-void sh_grid_tplot(int l, int c, const char * text);
+void x_grid_text(int l, int c, const char * text);
 
 /*writes a number until 5 char in cell*/
-void sh_grid_nplot(int l, int c, int number);
+void x_grid_number(int l, int c, int number);
 
 
 #endif //SDLHELP_H
 
-#ifdef SH_FULL
+#ifdef X_FULL
 
-SDL_Window * sh_window; //janela
-SDL_Renderer * sh_renderer; //renderizador do buffer
-int __sh_font_size = 25;
-TTF_Font  * sh_arr_fonts[SH_MAX_ITENS];
-sh_Sprite * sh_arr_sprites[SH_MAX_ITENS];
-Mix_Chunk * sh_arr_chunks[SH_MAX_ITENS];
-Mix_Music * sh_arr_musics[SH_MAX_ITENS];
-SDL_Color   sh_arr_colors[256];
+SDL_Window * x_window; //janela
+SDL_Renderer * x_renderer; //renderizador do buffer
+int __x_font_size = 25;
+TTF_Font  * x_arr_fonts[X_MAX_ITENS];
+x_Sprite * x_arr_sprites[X_MAX_ITENS];
+Mix_Chunk * x_arr_chunks[X_MAX_ITENS];
+Mix_Music * x_arr_musics[X_MAX_ITENS];
+SDL_Color   x_arr_colors[256];
 
-int sh_window_width = 800;
-int sh_window_height = 600;
+int x_window_width = 800;
+int x_window_height = 600;
 
-const SDL_Color sh_COLOR_WHITE     = {238, 232, 213, 255};
-const SDL_Color sh_COLOR_BLACK     = {7  , 54 , 66 , 255};
-const SDL_Color sh_COLOR_GREEN     = {133, 153, 0  , 255};
-const SDL_Color sh_COLOR_RED       = {211, 1  , 2  , 255};
-const SDL_Color sh_COLOR_BLUE      = {38 , 139, 210, 255};
-const SDL_Color sh_COLOR_YELLOW    = {181, 137, 0  , 255};
-const SDL_Color sh_COLOR_CYAN      = {42 , 161, 152, 255};
-const SDL_Color sh_COLOR_MAGENTA   = {211, 54 , 130, 255};
-const SDL_Color sh_COLOR_ORANGE    = {253, 106,   2, 255};
-const SDL_Color sh_COLOR_VIOLET    = {108, 113, 196, 255};
+const SDL_Color X_COLOR_WHITE     = {238, 232, 213, 255};
+const SDL_Color X_COLOR_BLACK     = {7  , 54 , 66 , 255};
+const SDL_Color X_COLOR_GREEN     = {133, 153, 0  , 255};
+const SDL_Color X_COLOR_RED       = {211, 1  , 2  , 255};
+const SDL_Color X_COLOR_BLUE      = {38 , 139, 210, 255};
+const SDL_Color X_COLOR_YELLOW    = {181, 137, 0  , 255};
+const SDL_Color X_COLOR_CYAN      = {42 , 161, 152, 255};
+const SDL_Color X_COLOR_MAGENTA   = {211, 54 , 130, 255};
+const SDL_Color X_COLOR_ORANGE    = {253, 106,   2, 255};
+const SDL_Color X_COLOR_VIOLET    = {108, 113, 196, 255};
 
-void sh_color_set(int r, int g, int b, int a){
-    SDL_SetRenderDrawColor(sh_renderer, r, g, b, a);
+void x_color_set(SDL_Color color){
+    SDL_SetRenderDrawColor(x_renderer, color.r, color.g, color.b, color.a);
 }
 
-void sh_color_load(Uint8 color){
-    SDL_Color c = sh_arr_colors[color];
-    SDL_SetRenderDrawColor(sh_renderer, c.r, c.g, c.b, c.a);
+void x_color_change(Uint8 color){
+    x_color_set(x_arr_colors[color]);
 }
 
-void sh_color_save(Uint8 color, int r, int g, int b, int a){
-    sh_arr_colors[color] = sh_make_color(r, g, b, a);
+SDL_Color x_color_get(){
+    SDL_Color color;
+    SDL_GetRenderDrawColor(x_renderer, &color.r, &color.g, &color.b, &color.a);
+    return color;
 }
 
-bool sh_input_is_key_pressed(int key){
+
+void x_palette_set(Uint8 color, int r, int g, int b, int a){
+    x_arr_colors[color] = x_color_make(r, g, b, a);
+}
+
+SDL_Color x_palette_get(Uint8 color){
+    return x_arr_colors[color];
+}
+
+bool x_is_key_pressed(int key){
     key = SDL_GetScancodeFromKey(key);
     int size;
     const Uint8 * keyboard = SDL_GetKeyboardState(&size);
@@ -326,112 +355,142 @@ bool sh_input_is_key_pressed(int key){
     return keyboard[key];
 }
 
-void sh_input_get_mouse_pos(int * x, int * y){
+void x_get_mouse_pos(int * x, int * y){
     SDL_GetMouseState(x, y);
 }
 
-int sh_input_get(){
+bool __x_poll_event(int * event){
     SDL_Event ev;
     while(SDL_PollEvent(&ev)){
-        if(ev.type == SDL_QUIT) 
-            return sh_EVQUIT;
+        if(ev.type == SDL_QUIT){ 
+            *event = X_EVENT_QUIT;
+            return true;
+        }
         else if(ev.type == SDL_MOUSEBUTTONDOWN){
-            if(ev.button.button == SDL_BUTTON_LEFT)  
-                return sh_EVLEFTCLICK;
-            if(ev.button.button == SDL_BUTTON_RIGHT) 
-                return sh_EVRIGHTCLICK;
+            if(ev.button.button == SDL_BUTTON_LEFT){
+                *event =  X_EVENT_LEFTCLICK;
+                return true;
+            }  
+            if(ev.button.button == SDL_BUTTON_RIGHT){ 
+                *event =  X_EVENT_RIGHTCLICK;
+                return true;
+            }
         }else if(ev.type == SDL_KEYDOWN){
-            return ev.key.keysym.sym;
+            *event =  ev.key.keysym.sym;
+            return true;
         }
     }
-    return 0;
+    *event = X_EVENT_NOTHING;
+    return false;
 }
 
-void sh_init(int width, int height){
+int x_has_events(int * event){
+    int ev;
+    __x_poll_event(&ev);
+    if(event != NULL)
+        *event = ev;
+    return ev;
+}
+
+
+
+void x_open(int width, int height, const char * title){
     SDL_Init(SDL_INIT_VIDEO);
-    sh_window_width = width; sh_window_height = height;
-    SDL_CreateWindowAndRenderer(width, height, 0, &sh_window, &sh_renderer);
+    x_window_width = width; x_window_height = height;
+    x_window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+    x_renderer = SDL_CreateRenderer(x_window, -1, SDL_RENDERER_ACCELERATED);
     if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 4, 2048 ) < 0 ) {
         printf( "Sound error: %s\n", Mix_GetError());
         exit(1);
     }
-    for(int i = 0; i < SH_MAX_ITENS; i++){
-        sh_arr_fonts[i] = NULL;
-        sh_arr_sprites[i] = NULL;
-        sh_arr_chunks[i] = NULL;
+    for(int i = 0; i < X_MAX_ITENS; i++){
+        x_arr_fonts[i] = NULL;
+        x_arr_sprites[i] = NULL;
+        x_arr_chunks[i] = NULL;
     }
     TTF_Init();
-    sh_font_set_size(25);
+    x_font_size(25);
 
-    sh_arr_colors['r'] = sh_COLOR_RED;
-    sh_arr_colors['g'] = sh_COLOR_GREEN;
-    sh_arr_colors['b'] = sh_COLOR_BLUE;
-    sh_arr_colors['y'] = sh_COLOR_YELLOW;
-    sh_arr_colors['m'] = sh_COLOR_MAGENTA;
-    sh_arr_colors['c'] = sh_COLOR_CYAN;
-    sh_arr_colors['k'] = sh_COLOR_BLACK;
-    sh_arr_colors['w'] = sh_COLOR_WHITE;
-    sh_arr_colors['o'] = sh_COLOR_ORANGE;
-    sh_arr_colors['v'] = sh_COLOR_VIOLET;
+    for(int i = 0; i < 256; i++)
+        x_arr_colors[i] = x_color_make(255, 255, 255, 255);
+
+    x_arr_colors['r'] = X_COLOR_RED;
+    x_arr_colors['g'] = X_COLOR_GREEN;
+    x_arr_colors['b'] = X_COLOR_BLUE;
+    x_arr_colors['y'] = X_COLOR_YELLOW;
+    x_arr_colors['m'] = X_COLOR_MAGENTA;
+    x_arr_colors['c'] = X_COLOR_CYAN;
+    x_arr_colors['k'] = X_COLOR_BLACK;
+    x_arr_colors['w'] = X_COLOR_WHITE;
+    x_arr_colors['o'] = X_COLOR_ORANGE;
+    x_arr_colors['v'] = X_COLOR_VIOLET;
 
     /*https://htmlcolorcodes.com/color-names/*/
 
-    sh_arr_colors[' '] = sh_make_color(230, 230, 250, 255); /*khaki*/
-    sh_arr_colors['.'] = sh_make_color(240, 230, 140, 255); /*lavender*/
-    sh_arr_colors['#'] = sh_make_color(25, 25, 112, 255); /*midnight blue*/
-    sh_arr_colors['x'] = sh_make_color(255, 99, 71, 255); /*tomato*/
+    x_arr_colors[' '] = x_color_make(230, 230, 250, 255); /*khaki*/
+    x_arr_colors['.'] = x_color_make(240, 230, 140, 255); /*lavender*/
+    x_arr_colors['#'] = x_color_make(25, 25, 112, 255); /*midnight blue*/
+    x_arr_colors['x'] = x_color_make(255, 99, 71, 255); /*tomato*/
 
     srand(time(NULL));
 }
 
-void sh_quit(){
-    for(int i = 0; i < SH_MAX_ITENS; i++){
-        if(sh_arr_fonts[i])
-            TTF_CloseFont(sh_arr_fonts[i]);
-        if(sh_arr_sprites[i]){
-            SDL_DestroyTexture(sh_arr_sprites[i]->texture);
-            free(sh_arr_sprites[i]);
+void x_close(){
+    for(int i = 0; i < X_MAX_ITENS; i++){
+        if(x_arr_fonts[i])
+            TTF_CloseFont(x_arr_fonts[i]);
+        if(x_arr_sprites[i]){
+            SDL_DestroyTexture(x_arr_sprites[i]->texture);
+            free(x_arr_sprites[i]);
         }
-        if(sh_arr_chunks[i])
-            Mix_FreeChunk(sh_arr_chunks[i]);
+        if(x_arr_chunks[i])
+            Mix_FreeChunk(x_arr_chunks[i]);
     }
-    SDL_DestroyRenderer(sh_renderer);
-    SDL_DestroyWindow(sh_window);
+    SDL_DestroyRenderer(x_renderer);
+    SDL_DestroyWindow(x_window);
     TTF_Quit();
     SDL_Quit();
 }
 
-int sh_sound_save(const char * path){
+void x_clear(){
+    SDL_RenderClear(x_renderer);
+}
+
+void x_display(){
+    SDL_RenderPresent(x_renderer);
+}
+
+int x_sound_load(const char * path){
     static int next_index = 0;
     int index = next_index;
     next_index += 1;
-    sh_arr_chunks[index] = Mix_LoadWAV(path); 
-    if(sh_arr_chunks[index] == NULL){
+    x_arr_chunks[index] = Mix_LoadWAV(path); 
+    if(x_arr_chunks[index] == NULL){
         printf( "Error: %s\n", Mix_GetError() );
         exit(1);
     }
     return index;
 }
 
-int sh_music_save(const char * path){
+int x_music_load(const char * path){
     static int next_index = 0;
     int index = next_index;
     next_index += 1;
-    sh_arr_musics[index] = Mix_LoadMUS(path); 
-    if(sh_arr_musics[index] == NULL){
+    x_arr_musics[index] = Mix_LoadMUS(path); 
+    if(x_arr_musics[index] == NULL){
         printf( "Error: %s\n", Mix_GetError() );
         exit(1);
     }
     return index;
 }
 
-void sh_sound_play(int index, int loops){
-    Mix_PlayChannel(-1, sh_arr_chunks[index], loops);
+void x_sound_play(int index, int loops){
+    Mix_PlayChannel(-1, x_arr_chunks[index], loops);
 }
 
-void sh_music_toggle_play(int index){
+void x_music_toggle_play(int index){
     if( Mix_PlayingMusic() == 0 )//musica ainda nao esta tocando 
-        Mix_PlayMusic(sh_arr_musics[index], -1 ); //coloque pra tocar
+        Mix_PlayMusic(x_arr_musics[index], -1 ); //coloque pra tocar
     else { //musica ja iniciou
         if( Mix_PausedMusic() == 1 ) //se esta pausada 
             Mix_ResumeMusic();  //continue
@@ -440,8 +499,8 @@ void sh_music_toggle_play(int index){
     }
 }
 
-SDL_Rect sh_sprite_get_rect_source(int index, int subindex){
-    sh_Sprite * tex = sh_arr_sprites[index];
+SDL_Rect x_sprite_get_rect_source(int index, int subindex){
+    x_Sprite * tex = x_arr_sprites[index];
     int qtd = tex->nl * tex->nc;
     int pos = subindex % qtd;
     if(pos < 0) 
@@ -450,56 +509,60 @@ SDL_Rect sh_sprite_get_rect_source(int index, int subindex){
     return source;
 }
 
-void sh_sprite_draw(int index, int subindex, int x, int y){
-    sh_Sprite * tex = sh_arr_sprites[index];
-    SDL_Rect source = sh_sprite_get_rect_source(index, subindex);
-    SDL_Rect dest = {x, y, sh_arr_sprites[index]->width, sh_arr_sprites[index]->height};
-    SDL_RenderCopy(sh_renderer, tex->texture, &source, &dest);
+void x_sprite_draw(int index, int subindex, int x, int y){
+    x_Sprite * tex = x_arr_sprites[index];
+    SDL_Rect source = x_sprite_get_rect_source(index, subindex);
+    SDL_Rect dest = {x, y, x_arr_sprites[index]->width, x_arr_sprites[index]->height};
+    SDL_RenderCopy(x_renderer, tex->texture, &source, &dest);
 }
 
-void sh_sprite_draw_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip){
-    sh_Sprite * tex = sh_arr_sprites[index];
-    SDL_Rect source = sh_sprite_get_rect_source(index, subindex);
-    SDL_Rect dest = {x, y, sh_arr_sprites[index]->width, sh_arr_sprites[index]->height};
-    SDL_RenderCopyEx(sh_renderer, tex->texture, &source, &dest, angle, NULL, flip);
+void x_sprite_draw_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip){
+    x_Sprite * tex = x_arr_sprites[index];
+    SDL_Rect source = x_sprite_get_rect_source(index, subindex);
+    SDL_Rect dest = {x, y, x_arr_sprites[index]->width, x_arr_sprites[index]->height};
+    SDL_RenderCopyEx(x_renderer, tex->texture, &source, &dest, angle, NULL, flip);
 }
 
-int  sh_sprite_save(const char * path, int nl, int nc, int width, int height){
+int  x_sprite_load(const char * path, int nl, int nc, int width, int height){
     static int next_index = 0;
     int index = next_index;
     next_index++;
-    sh_arr_sprites[index] = (sh_Sprite *) malloc(sizeof(sh_Sprite));
+    x_arr_sprites[index] = (x_Sprite *) malloc(sizeof(x_Sprite));
     SDL_Surface * image = SDL_LoadBMP(path);
     if(image == NULL){
         printf( "Error: %s\n", SDL_GetError() );
         exit(1);
     }
-    sh_arr_sprites[index]->texture = SDL_CreateTextureFromSurface(sh_renderer, image);
+    x_arr_sprites[index]->texture = SDL_CreateTextureFromSurface(x_renderer, image);
     SDL_FreeSurface(image);
-    sh_arr_sprites[index]->width = width;
-    sh_arr_sprites[index]->height = height;
+    x_arr_sprites[index]->width = width;
+    x_arr_sprites[index]->height = height;
 
-    sh_Sprite * stex = sh_arr_sprites[index];
+    x_Sprite * stex = x_arr_sprites[index];
     stex->nl = nl;
     stex->nc = nc;
     int w = 0, h = 0;
     SDL_QueryTexture(stex->texture, NULL, NULL, &w, &h);
     stex->w_one = w/nc;
     stex->h_one = h/nl;
-    sh_arr_sprites[index] = stex;
+    x_arr_sprites[index] = stex;
     return index;
 }
 
-bool sh_timer(int * timer, int time){
+bool x_timer(int * timer, int ms){
     int clock = SDL_GetTicks();
-    if(clock - (*timer) > time){
+    if(clock - (*timer) > ms){
         *timer = clock;
         return true;
     }
     return false;
 }
 
-void sh_write(int x, int y, const char * format, ...){
+void x_delay(int ms){
+    SDL_Delay(ms);
+}
+
+void x_write(int x, int y, const char * format, ...){
     char text[1000];
     va_list args;
     va_start( args, format );
@@ -507,74 +570,69 @@ void sh_write(int x, int y, const char * format, ...){
     va_end( args );
 
     Uint8 r, g, b, a;
-    SDL_GetRenderDrawColor(sh_renderer, &r, &g, &b, &a);
+    SDL_GetRenderDrawColor(x_renderer, &r, &g, &b, &a);
     SDL_Color color = {r, g, b, a};
-    SDL_Surface * surface = TTF_RenderText_Solid(sh_arr_fonts[__sh_font_size], text, color);
-    SDL_Texture * texture = SDL_CreateTextureFromSurface(sh_renderer, surface);
+    SDL_Surface * surface = TTF_RenderText_Solid(x_arr_fonts[__x_font_size], text, color);
+    SDL_Texture * texture = SDL_CreateTextureFromSurface(x_renderer, surface);
     int texW = 0;
     int texH = 0;
     SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
     SDL_Rect dstrect = { x, y, texW, texH};
-    SDL_RenderCopy(sh_renderer, texture, NULL, &dstrect);
+    SDL_RenderCopy(x_renderer, texture, NULL, &dstrect);
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
 }
 
-/* int sh_font_save(const char * path, int size){
+/* int x_font_save(const char * path, int size){
     static int next_index = 1;
     int index = next_index;
     next_index += 1;
-    sh_arr_fonts[index] = TTF_OpenFont(path, size);
-    if(!sh_arr_fonts[index]) {
+    x_arr_fonts[index] = TTF_OpenFont(path, size);
+    if(!x_arr_fonts[index]) {
         printf("Error: TTF_OpenFont: %s\n", TTF_GetError());
         exit(1);
     }
     return index;
 }
 
-void sh_font_load(int index){
-    if(sh_arr_fonts[index] == NULL){
+void x_font_load(int index){
+    if(x_arr_fonts[index] == NULL){
         printf("Error: font index %d do not found\n", index);
         exit(1);
     }
-    __sh_font_size = index;
+    __x_font_size = index;
 } */
 
-void sh_font_set_size(int size){
-    TTF_Font * font = sh_arr_fonts[size];
-    __sh_font_size = size;
+void x_font_size(int size){
+    TTF_Font * font = x_arr_fonts[size];
+    __x_font_size = size;
     if(font == NULL){
-        sh_arr_fonts[__sh_font_size] = TTF_OpenFontRW(SDL_RWFromConstMem(__sh_font_buffer_profont, sizeof(__sh_font_buffer_profont)), 1, __sh_font_size);
+        x_arr_fonts[__x_font_size] = TTF_OpenFontRW(SDL_RWFromConstMem(__x_font_buffer_profont, sizeof(__x_font_buffer_profont)), 1, __x_font_size);
     }
 }
 
-#include <assert.h>
-#include <stdio.h>
-#include <inttypes.h>
-
-float sh_v2d_lenght(float x, float y){
+float x_v2d_lenght(float x, float y){
     return sqrt(x * x + y * y);
 }
 
-float sh_v2d_distance(float ax, float ay, float bx, float by){
-    return sh_v2d_lenght(bx - ax, by - ay);
+float x_v2d_distance(float ax, float ay, float bx, float by){
+    return x_v2d_lenght(bx - ax, by - ay);
 }
 
-
-sh_V2d sh_v2d_sum(sh_V2d a, sh_V2d b){
-    return (sh_V2d){a.x + b.x, a.y + b.y};
+x_V2d x_v2d_sum(x_V2d a, x_V2d b){
+    return (x_V2d){a.x + b.x, a.y + b.y};
 }
 
-sh_V2d sh_v2d_sub(sh_V2d a, sh_V2d b){
-    return (sh_V2d){a.x - b.x, a.y - b.y};
+x_V2d x_v2d_sub(x_V2d a, x_V2d b){
+    return (x_V2d){a.x - b.x, a.y - b.y};
 }
 
-sh_V2d sh_v2d_dot(sh_V2d a, float value){
-    return (sh_V2d){a.x * value, a.y  * value};
+x_V2d x_v2d_dot(x_V2d a, float value){
+    return (x_V2d){a.x * value, a.y  * value};
 }
 
-sh_V2d sh_v2d_normalize(sh_V2d v){
-    float lenght = sh_v2d_lenght(v.x, v.y);
+x_V2d x_v2d_normalize(x_V2d v){
+    float lenght = x_v2d_lenght(v.x, v.y);
     if(lenght == 0)
         return v;
     v.x = v.x * (1.0/lenght);
@@ -582,38 +640,35 @@ sh_V2d sh_v2d_normalize(sh_V2d v){
     return v;
 }
 
-sh_V2d sh_v2d_ortho(sh_V2d v){
-    return (sh_V2d){v.y, -v.x};
+x_V2d x_v2d_ortho(x_V2d v){
+    return (x_V2d){v.y, -v.x};
 }
 
-
-#define SH_SWAP(x, y, T) do { T SH_SWAP = x; x = y; y = SH_SWAP; } while (0)
-
-void sh_plot(int x, int y){
-    SDL_RenderDrawPoint(sh_renderer, x, y);
+void x_plot(int x, int y){
+    SDL_RenderDrawPoint(x_renderer, x, y);
 }
 
-void sh_draw_line(int x0, int y0, int x1, int y1){
-    SDL_RenderDrawLine(sh_renderer, x0, y0, x1, y1);
+void x_draw_line(int x0, int y0, int x1, int y1){
+    SDL_RenderDrawLine(x_renderer, x0, y0, x1, y1);
 }
 
-void sh_fill_line(float x0, float y0, float x1, float y1, int thickness){
-    sh_V2d a = {x0, y0};
-    sh_V2d b = {x1, y1};
+void x_fill_line(float x0, float y0, float x1, float y1, int thickness){
+    x_V2d a = {x0, y0};
+    x_V2d b = {x1, y1};
     if(thickness == 1){
-        sh_draw_line(a.x, a.y, b.x, b.y);
+        x_draw_line(a.x, a.y, b.x, b.y);
         return;
     }
-    sh_V2d _offset = {b.x - a.x, b.y - a.y};
-    _offset = sh_v2d_dot(sh_v2d_ortho(sh_v2d_normalize(_offset)), (thickness/2.f));
+    x_V2d _offset = {b.x - a.x, b.y - a.y};
+    _offset = x_v2d_dot(x_v2d_ortho(x_v2d_normalize(_offset)), (thickness/2.f));
 
-    sh_V2d p1 = sh_v2d_sub(a, _offset);
-    sh_V2d p2 = sh_v2d_sub(b, _offset);
-    sh_V2d p3 = sh_v2d_sum(a, _offset);
-    sh_V2d p4 = sh_v2d_sum(b, _offset);
+    x_V2d p1 = x_v2d_sub(a, _offset);
+    x_V2d p2 = x_v2d_sub(b, _offset);
+    x_V2d p3 = x_v2d_sum(a, _offset);
+    x_V2d p4 = x_v2d_sum(b, _offset);
 
-    sh_fill_triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
-    sh_fill_triangle(p3.x, p3.y, p2.x, p2.y, p4.x, p4.y);
+    x_fill_triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+    x_fill_triangle(p3.x, p3.y, p2.x, p2.y, p4.x, p4.y);
 }
 
 
@@ -627,7 +682,7 @@ void __x_fill_bottom_flat_triangle(float v1x, float v1y, float v2x, float v2y, f
     int scanlineY;
 
     for (scanlineY = v1y; scanlineY <= (int)v2y; scanlineY++){
-        sh_draw_line(curx1, scanlineY, curx2, scanlineY);
+        x_draw_line(curx1, scanlineY, curx2, scanlineY);
         curx1 += invslope1;
         curx2 += invslope2;
     }
@@ -645,24 +700,24 @@ void __x_fill_top_flat_triangle(float v1x, float v1y, float v2x, float v2y, floa
     
     for (scanlineY = v3y; scanlineY >= v1y; scanlineY--)
     {
-        sh_draw_line(curx1, scanlineY, curx2, scanlineY);
+        x_draw_line(curx1, scanlineY, curx2, scanlineY);
         curx1 -= invslope1;
         curx2 -= invslope2;
     }
 }
 
-void sh_fill_triangle(float v1x, float v1y, float v2x, float v2y, float v3x, float v3y)
+void x_fill_triangle(float v1x, float v1y, float v2x, float v2y, float v3x, float v3y)
 {
-    sh_V2d v1 = {v1x, v1y};
-    sh_V2d v2 = {v2x, v2y};
-    sh_V2d v3 = {v3x, v3y};
+    x_V2d v1 = {v1x, v1y};
+    x_V2d v2 = {v2x, v2y};
+    x_V2d v3 = {v3x, v3y};
     /* at first sort the three vertices by y-coordinate ascending so v1 is the topmost vertice */
     if((v2.y <= v1.y) && (v2.y <= v3.y))
-        SH_SWAP(v1, v2, sh_V2d);
+        X_SWAP(v1, v2, x_V2d);
     if((v3.y <= v1.y) && (v3.y <= v2.y))
-        SH_SWAP(v1, v3, sh_V2d);
+        X_SWAP(v1, v3, x_V2d);
     if(v3.y < v2.y)
-        SH_SWAP(v2, v3, sh_V2d);
+        X_SWAP(v2, v3, x_V2d);
 
     /* here we know that v1.y <= v2.y <= v3.y */
     /* check for trivial case of bottom-flat triangle */
@@ -673,7 +728,7 @@ void sh_fill_triangle(float v1x, float v1y, float v2x, float v2y, float v3x, flo
     else
     {
         /* general case - split the triangle in a topflat and bottom-flat one */
-        sh_V2d v4 = {0.f, 0.f};
+        x_V2d v4 = {0.f, 0.f};
         v4.x = (v1.x + ((float)(v2.y - v1.y) / (float)(v3.y - v1.y)) * (v3.x - v1.x));
         v4.y = v2.y;
         __x_fill_bottom_flat_triangle(v1.x, v1.y, v2.x, v2.y, v4.x, v4.y);
@@ -682,42 +737,42 @@ void sh_fill_triangle(float v1x, float v1y, float v2x, float v2y, float v3x, flo
 }
 
 
-void sh_draw_rect(int x0, int y0, int x1, int y1){
+void x_draw_rect(int x0, int y0, int x1, int y1){
     SDL_Rect rect = {x0, y0, x1 - x0 + 1, y1 - y0 + 1};
-    SDL_RenderDrawRect(sh_renderer, &rect);
+    SDL_RenderDrawRect(x_renderer, &rect);
 }
 
-void sh_fill_rect(int x0, int y0, int x1, int y1){
+void x_fill_rect(int x0, int y0, int x1, int y1){
     SDL_Rect rect = {x0, y0, x1 - x0 + 1, y1 - y0 + 1};
-    SDL_RenderFillRect(sh_renderer, &rect);
+    SDL_RenderFillRect(x_renderer, &rect);
 }
 
-void sh_draw_square(int x, int y, int side){
+void x_draw_square(int x, int y, int side){
     SDL_Rect rect = {x, y, side, side};
-    SDL_RenderDrawRect(sh_renderer, &rect);
+    SDL_RenderDrawRect(x_renderer, &rect);
 }
 
-void sh_fill_square(int x, int y, int side){
+void x_fill_square(int x, int y, int side){
     SDL_Rect rect = {x, y, side, side};
-    SDL_RenderFillRect(sh_renderer, &rect);
+    SDL_RenderFillRect(x_renderer, &rect);
 }
 
 /* https://en.wikipedia.org/wiki/Midpoint_circle_algorithm */
-void sh_draw_circle(int centerx, int centery, int radius){
+void x_draw_circle(int centerx, int centery, int radius){
     int x = radius - 1;
     int y = 0;
     int dx = 1;
     int dy = 1;
     int err = dx - (radius << 1);
     while(x >= y){
-        sh_plot(centerx + x, centery + y);
-        sh_plot(centerx - x, centery + y);
-        sh_plot(centerx + x, centery - y);
-        sh_plot(centerx - x, centery - y);
-        sh_plot(centerx + y, centery + x);
-        sh_plot(centerx - y, centery + x);
-        sh_plot(centerx - y, centery - x);
-        sh_plot(centerx + y, centery - x);
+        x_plot(centerx + x, centery + y);
+        x_plot(centerx - x, centery + y);
+        x_plot(centerx + x, centery - y);
+        x_plot(centerx - x, centery - y);
+        x_plot(centerx + y, centery + x);
+        x_plot(centerx - y, centery + x);
+        x_plot(centerx - y, centery - x);
+        x_plot(centerx + y, centery - x);
 
         if(err <= 0){
             y++;
@@ -731,17 +786,17 @@ void sh_draw_circle(int centerx, int centery, int radius){
     }
 }
 
-void sh_fill_circle(int centerx, int centery, int radius){
+void x_fill_circle(int centerx, int centery, int radius){
     int x = radius - 1;
     int y = 0;
     int dx = 1;
     int dy = 1;
     int err = dx - (radius << 1);
     while(x >= y){
-        sh_draw_line(centerx + x, centery + y, centerx - x, centery + y);
-        sh_draw_line(centerx + x, centery - y, centerx - x, centery - y);
-        sh_draw_line(centerx + y, centery + x, centerx - y, centery + x);
-        sh_draw_line(centerx - y, centery - x, centerx + y, centery - x);
+        x_draw_line(centerx + x, centery + y, centerx - x, centery + y);
+        x_draw_line(centerx + x, centery - y, centerx - x, centery - y);
+        x_draw_line(centerx + y, centery + x, centerx - y, centery + x);
+        x_draw_line(centerx - y, centery - x, centerx + y, centery - x);
         if(err <= 0){
             y++;
             err += dy;
@@ -754,7 +809,7 @@ void sh_fill_circle(int centerx, int centery, int radius){
     }
 }
 
-void sh_draw_ellipse(int x0, int y0, int x1, int y1)
+void x_draw_ellipse(int x0, int y0, int x1, int y1)
 {
     int a = abs(x1-x0), b = abs(y1-y0), b1 = b&1; /* values of diameter */
     long dx = 4*(1-a)*b*b, dy = 4*(b1+1)*a*a; /* error increment */
@@ -766,24 +821,24 @@ void sh_draw_ellipse(int x0, int y0, int x1, int y1)
     a *= 8*a; b1 = 8*b*b;
 
     do {
-        sh_plot(x1, y0); /*   I. Quadrant */
-        sh_plot(x0, y0); /*  II. Quadrant */
-        sh_plot(x0, y1); /* III. Quadrant */
-        sh_plot(x1, y1); /*  IV. Quadrant */
+        x_plot(x1, y0); /*   I. Quadrant */
+        x_plot(x0, y0); /*  II. Quadrant */
+        x_plot(x0, y1); /* III. Quadrant */
+        x_plot(x1, y1); /*  IV. Quadrant */
         e2 = 2*err;
         if (e2 <= dy) { y0++; y1--; err += dy += a; }  /* y step */
         if (e2 >= dx || 2*err > dy) { x0++; x1--; err += dx += b1; } /* x step */
     } while (x0 <= x1);
 
     while (y0-y1 < b) {  /* too early stop of flat ellipses a=1 */
-        sh_plot(x0-1, y0); /* -> finish tip of ellipse */
-        sh_plot(x1+1, y0++);
-        sh_plot(x0-1, y1);
-        sh_plot(x1+1, y1--);
+        x_plot(x0-1, y0); /* -> finish tip of ellipse */
+        x_plot(x1+1, y0++);
+        x_plot(x0-1, y1);
+        x_plot(x1+1, y1--);
     }
 }
 
-void sh_fill_ellipse(int x0, int y0, int x1, int y1)
+void x_fill_ellipse(int x0, int y0, int x1, int y1)
 {
     int a = abs(x1-x0), b = abs(y1-y0), b1 = b&1; /* values of diameter */
     long dx = 4*(1-a)*b*b, dy = 4*(b1+1)*a*a; /* error increment */
@@ -795,25 +850,25 @@ void sh_fill_ellipse(int x0, int y0, int x1, int y1)
     a *= 8*a; b1 = 8*b*b;
 
     do {
-        sh_draw_line(x1, y0, x0, y0); /*   I. Quadrant */
-        sh_draw_line(x0, y1, x1, y1); /* III. Quadrant */
+        x_draw_line(x1, y0, x0, y0); /*   I. Quadrant */
+        x_draw_line(x0, y1, x1, y1); /* III. Quadrant */
         e2 = 2*err;
         if (e2 <= dy) { y0++; y1--; err += dy += a; }  /* y step */
         if (e2 >= dx || 2*err > dy) { x0++; x1--; err += dx += b1; } /* x step */
     } while (x0 <= x1);
 
     while (y0-y1 < b) {  /* too early stop of flat ellipses a=1 */
-        sh_plot(x0-1, y0); /* -> finish tip of ellipse */
-        sh_plot(x1+1, y0++);
-        sh_plot(x0-1, y1);
-        sh_plot(x1+1, y1--);
+        x_plot(x0-1, y0); /* -> finish tip of ellipse */
+        x_plot(x1+1, y0++);
+        x_plot(x0-1, y1);
+        x_plot(x1+1, y1--);
     }
 }
 
-void __sh_plot_quad_bezier_seg(int x0, int y0, int x1, int y1, int x2, int y2)
+void __x_plot_quad_bezier_seg(int x0, int y0, int x1, int y1, int x2, int y2)
 {
     int sx = x2-x1, sy = y2-y1;
-    long xx = x0-x1, yy = y0-y1, sh_V2d;         /* relative values for checks */
+    long xx = x0-x1, yy = y0-y1, x_V2d;         /* relative values for checks */
     double dx, dy, err, cur = xx*sy-yy*sx;                    /* curvature */
 
     assert(xx*sx <= 0 && yy*sy <= 0);  /* sign of gradient must not change */
@@ -824,24 +879,24 @@ void __sh_plot_quad_bezier_seg(int x0, int y0, int x1, int y1, int x2, int y2)
     if (cur != 0) {                                    /* no straight line */
         xx += sx; xx *= sx = x0 < x2 ? 1 : -1;           /* x step direction */
         yy += sy; yy *= sy = y0 < y2 ? 1 : -1;           /* y step direction */
-        sh_V2d = 2*xx*yy; xx *= xx; yy *= yy;          /* differences 2nd degree */
+        x_V2d = 2*xx*yy; xx *= xx; yy *= yy;          /* differences 2nd degree */
         if (cur*sx*sy < 0) {                           /* negated curvature? */
-            xx = -xx; yy = -yy; sh_V2d = -sh_V2d; cur = -cur;
+            xx = -xx; yy = -yy; x_V2d = -x_V2d; cur = -cur;
         }
-        dx = 4.0*sy*cur*(x1-x0)+xx-sh_V2d;             /* differences 1st degree */
-        dy = 4.0*sx*cur*(y0-y1)+yy-sh_V2d;
-        xx += xx; yy += yy; err = dx+dy+sh_V2d;                /* error 1st step */
+        dx = 4.0*sy*cur*(x1-x0)+xx-x_V2d;             /* differences 1st degree */
+        dy = 4.0*sx*cur*(y0-y1)+yy-x_V2d;
+        xx += xx; yy += yy; err = dx+dy+x_V2d;                /* error 1st step */
         do {
-            sh_plot(x0,y0);                                     /* plot curve */
+            x_plot(x0,y0);                                     /* plot curve */
             if (x0 == x2 && y0 == y2) return;  /* last pixel -> curve finished */
             y1 = 2*err < dx;                  /* save value for test of y step */
-            if (2*err > dy) { x0 += sx; dx -= sh_V2d; err += dy += yy; } /* x step */
-            if (    y1    ) { y0 += sy; dy -= sh_V2d; err += dx += xx; } /* y step */
+            if (2*err > dy) { x0 += sx; dx -= x_V2d; err += dy += yy; } /* x step */
+            if (    y1    ) { y0 += sy; dy -= x_V2d; err += dx += xx; } /* y step */
         } while (dy < dx );           /* gradient negates -> algorithm fails */
     }
-    sh_draw_line(x0,y0, x2,y2);                  /* plot remaining part to end */
+    x_draw_line(x0,y0, x2,y2);                  /* plot remaining part to end */
 }
-void sh_draw_bezier(int x0, int y0, int x1, int y1, int x2, int y2)
+void x_draw_bezier(int x0, int y0, int x1, int y1, int x2, int y2)
 {                                          /* plot any quadratic Bezier curve */
     int x = x0-x1, y = y0-y1;
     double t = x0-2*x1+x2, r;
@@ -856,7 +911,7 @@ void sh_draw_bezier(int x0, int y0, int x1, int y1, int x2, int y2)
         t = (x0*x2-x1*x1)*t/(x0-x1);                       /* gradient dP4/dx=0 */
         x = floor(t+0.5); y = floor(r+0.5);
         r = (y1-y0)*(t-x0)/(x1-x0)+y0;                  /* intersect P3 | P0 P1 */
-        __sh_plot_quad_bezier_seg(x0,y0, x,floor(r+0.5), x,y);
+        __x_plot_quad_bezier_seg(x0,y0, x,floor(r+0.5), x,y);
         r = (y1-y2)*(t-x2)/(x1-x2)+y2;                  /* intersect P4 | P1 P2 */
         x0 = x1 = x; y0 = y; y1 = floor(r+0.5);             /* P0 = P4, P1 = P8 */
     }
@@ -866,11 +921,11 @@ void sh_draw_bezier(int x0, int y0, int x1, int y1, int x2, int y2)
         t = (y0*y2-y1*y1)*t/(y0-y1);                       /* gradient dP6/dy=0 */
         x = floor(r+0.5); y = floor(t+0.5);
         r = (x1-x0)*(t-y0)/(y1-y0)+x0;                  /* intersect P6 | P0 P1 */
-        __sh_plot_quad_bezier_seg(x0,y0, floor(r+0.5),y, x,y);
+        __x_plot_quad_bezier_seg(x0,y0, floor(r+0.5),y, x,y);
         r = (x1-x2)*(t-y2)/(y1-y2)+x2;                  /* intersect P7 | P1 P2 */
         x0 = x; x1 = floor(r+0.5); y0 = y1 = y;             /* P0 = P6, P1 = P7 */
     }
-    __sh_plot_quad_bezier_seg(x0,y0, x1,y1, x2,y2);                  /* remaining part */
+    __x_plot_quad_bezier_seg(x0,y0, x1,y1, x2,y2);                  /* remaining part */
 }
 
 
@@ -916,18 +971,9 @@ static int32_t __COS(int d) {
     }
 }
 
-void sh_fill_arc(float centerx, float centery, int radius, int thickness, int degrees_begin, int degrees_end) {
-    if(degrees_begin > degrees_end)
-        puts("drawArc: s deve ser menor que e");
-    sh_V2d center = {centerx, centery};
-    degrees_begin = degrees_begin%360;
-    degrees_end = degrees_end%360;
-
-    while (degrees_begin < 0) degrees_begin += 360;
-    while (degrees_end < 0) degrees_end += 360;
-
-    if (degrees_end == 0) degrees_end = 360;
-
+//begin should be smaller than end, and both must be in interval [0, 360]
+void __x_fill_arc(float centerx, float centery, int radius, int thickness, int degrees_begin, int degrees_end) {
+    x_V2d center = {centerx, centery};
     float sslope = (float)__COS(degrees_begin) / (float)__SIN(degrees_begin);
     float eslope = (float)__COS(degrees_end) / (float)__SIN(degrees_end);
 
@@ -958,37 +1004,61 @@ void sh_fill_arc(float centerx, float centery, int radius, int thickness, int de
                         (y == 0 && degrees_begin == 0 && x > 0)
                         )
                     )
-                sh_plot(center.x+x, center.y-y);
+                x_plot(center.x+x, center.y-y);
         }
     }
+
 }
 
-int __sh_GRID_SIDE = 50;
-int __sh_GRID_SEP = 1;
+void x_fill_arc(float centerx, float centery, int radius, int thickness, int degrees_begin, int degrees_lenght){
+    if(degrees_lenght % 360 == 0)
+        degrees_lenght = 360;
+    else
+        degrees_lenght %= 360;
+    if(degrees_lenght < 0){
+        degrees_lenght *= -1;
+        degrees_begin -= degrees_lenght;
+    }
+    degrees_begin %= 360;
+    if(degrees_begin < 0)
+        degrees_begin += 360;
+    int degrees_end = degrees_begin + degrees_lenght;
 
-void sh_grid_init(int side, int sep){
-    __sh_GRID_SIDE = side;
-    __sh_GRID_SEP = sep;
+    if(degrees_end <= 360){
+        __x_fill_arc(centerx, centery, radius, thickness, degrees_begin, degrees_end);
+    }else{
+        __x_fill_arc(centerx, centery, radius, thickness, degrees_begin, 360);
+        __x_fill_arc(centerx, centery, radius, thickness, 0, degrees_end - 360);
+    }
+    
 }
 
-void sh_grid_splot(int l, int c){
-    sh_fill_rect(c * __sh_GRID_SIDE + __sh_GRID_SEP, l * __sh_GRID_SIDE + __sh_GRID_SEP, 
-                  (c + 1) * __sh_GRID_SIDE - 1 * __sh_GRID_SEP, (l + 1) * __sh_GRID_SIDE - 1 * __sh_GRID_SEP);
+int __x_GRID_SIDE = 50;
+int __x_GRID_SEP = 1;
+
+void x_grid_init(int side, int sep){
+    __x_GRID_SIDE = side;
+    __x_GRID_SEP = sep;
 }
 
-void sh_grid_cplot(int l, int c){
-    sh_fill_circle(c * __sh_GRID_SIDE + __sh_GRID_SIDE/2, l * __sh_GRID_SIDE + __sh_GRID_SIDE/2, 
-                   __sh_GRID_SIDE/2 - __sh_GRID_SEP + 1);
+void x_grid_square(int l, int c){
+    x_fill_rect(c * __x_GRID_SIDE + __x_GRID_SEP, l * __x_GRID_SIDE + __x_GRID_SEP, 
+                  (c + 1) * __x_GRID_SIDE - 1 * __x_GRID_SEP, (l + 1) * __x_GRID_SIDE - 1 * __x_GRID_SEP);
 }
 
-void sh_grid_nplot(int l, int c, int number){
+void x_grid_circle(int l, int c){
+    x_fill_circle(c * __x_GRID_SIDE + __x_GRID_SIDE/2, l * __x_GRID_SIDE + __x_GRID_SIDE/2, 
+                   __x_GRID_SIDE/2 - __x_GRID_SEP + 1);
+}
+
+void x_grid_number(int l, int c, int number){
     char data[100];
     sprintf(data, "%d", number);
-    sh_grid_tplot(l, c, data);
+    x_grid_text(l, c, data);
 }
 
 
-void sh_grid_tplot(int l, int c, const char * text){
+void x_grid_text(int l, int c, const char * text){
     float font_factor = 1.0;
     float fsize = 0, xdelta = 0, ydelta = 0;
     (void)fsize;
@@ -1010,12 +1080,12 @@ void sh_grid_tplot(int l, int c, const char * text){
         fsize = 0.35; xdelta = 0.1; ydelta = 0.35;
         text2[5] = '\0';
     }
-    sh_font_set_size(__sh_GRID_SIDE * fsize * font_factor);   
-    sh_write((c + xdelta) * __sh_GRID_SIDE, (l + ydelta) * __sh_GRID_SIDE, "%s", text2);
+    x_font_size(__x_GRID_SIDE * fsize * font_factor);   
+    x_write((c + xdelta) * __x_GRID_SIDE, (l + ydelta) * __x_GRID_SIDE, "%s", text2);
     
 }
 
-unsigned char __sh_font_buffer_profont[46628] = {
+unsigned char __x_font_buffer_profont[46628] = {
     0x00, 0x01, 0x00, 0x00, 0x00, 0x10, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x46, 0x46, 0x54, 0x4d, 
     0x65, 0x58, 0x7e, 0x4f, 0x00, 0x00, 0xb6, 0x08, 0x00, 0x00, 0x00, 0x1c, 0x47, 0x44, 0x45, 0x46, 
     0x00, 0x27, 0x01, 0x43, 0x00, 0x00, 0xb5, 0xe0, 0x00, 0x00, 0x00, 0x26, 0x4f, 0x53, 0x2f, 0x32, 
@@ -3933,4 +4003,4 @@ unsigned char __sh_font_buffer_profont[46628] = {
     0xd5, 0x15, 0x03, 0xf7  
     };
 
-#endif //SH_DEF
+#endif //X_DEF

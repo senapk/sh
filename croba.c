@@ -1,4 +1,4 @@
-#define SH_FULL
+#define X_FULL
 #include "sh.h"
 
 
@@ -36,15 +36,15 @@ Cobra gerar_cobra(){
 
 //                0   , 1 , 2    , 3
 //                LEFT, UP, RIGHT, DOWN
-sh_V2d vet_dir[4] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+x_V2d vet_dir[4] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 
 void draw_square(Bloco bloco){
-    sh_color_load(bloco.cor);
+    x_color_load(bloco.cor);
     XY pos = bloco.pos;
     pos.x *= LADO;
     pos.y *= LADO;
     for(int i = 0; i < LADO; i++)
-        sh_draw_line(pos.x, pos.y + i, pos.x + LADO - 1, pos.y + i);
+        x_draw_line(pos.x, pos.y + i, pos.x + LADO - 1, pos.y + i);
 }
 
 void dar_a_volta(XY * pos){
@@ -62,15 +62,15 @@ void dar_a_volta(XY * pos){
 
 int main(){
     int speed = 300;
-    sh_init(NC * LADO, NL * LADO);
+    x_open(NC * LADO, NL * LADO);
     int pontos = 0;
     Cobra cobra = gerar_cobra();
     Bloco food = gerar_bloco_aleat();
 
     int timer = 0;
     while(true){
-        int c = sh_input_get();
-        if(c == sh_EVQUIT){
+        int c = x_get_event();
+        if(c == X_EVENT_QUIT){
             break;
         }else if(c == SDLK_RIGHT){
             cobra.dir = 2;
@@ -82,7 +82,7 @@ int main(){
             cobra.dir = 3;
         }
 
-        if(sh_timer(&timer, speed)){
+        if(x_timer(&timer, speed)){
             for(int i = cobra.size - 1; i >= 1; i--)
                 cobra.corpo[i].pos = cobra.corpo[i - 1].pos;
             timer = SDL_GetTicks();
@@ -101,14 +101,14 @@ int main(){
             speed *= 0.8;
         }
 
-        sh_color_load('k');
-        sh_clear();
-        sh_color_load('w');
+        x_color_load('k');
+        x_clear();
+        x_color_load('w');
         for(int i = 0; i < cobra.size; i++)
             draw_square(cobra.corpo[i]);
         draw_square(food);
-        sh_write(0, 0, 0, "pontos %d", pontos);
-        sh_display();
+        x_write(0, 0, 0, "pontos %d", pontos);
+        x_display();
     }
-    sh_quit();
+    x_close();
 }
