@@ -36,10 +36,10 @@ Cobra gerar_cobra(){
 
 //                0   , 1 , 2    , 3
 //                LEFT, UP, RIGHT, DOWN
-x_V2d vet_dir[4] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+X_V2d vet_dir[4] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 
 void draw_square(Bloco bloco){
-    x_color_load(bloco.cor);
+    x_palette_get(bloco.cor);
     XY pos = bloco.pos;
     pos.x *= LADO;
     pos.y *= LADO;
@@ -101,9 +101,9 @@ int main(){
             speed *= 0.8;
         }
 
-        x_color_load('k');
+        x_palette_get('k');
         x_clear();
-        x_color_load('w');
+        x_palette_get('w');
         for(int i = 0; i < cobra.size; i++)
             draw_square(cobra.corpo[i]);
         draw_square(food);

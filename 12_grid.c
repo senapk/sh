@@ -2,17 +2,17 @@
 #include "sh.h"
 
 void show_mat(int nl, int nc, char mat[nl][nc]){
-    x_color_load('w');
+    x_palette_get('w');
     x_clear();
     char * colors = "rgbymcov";
     int l, c;
     for(l = 0; l < nl; l++)
         for(c = 0; c < nc; c++){
-            x_color_load(mat[l][c]);
+            x_palette_get(mat[l][c]);
             x_grid_square(l, c);
-            x_color_load(colors[(c + l) % strlen(colors)]);
+            x_palette_get(colors[(c + l) % strlen(colors)]);
             x_grid_circle(l, c);
-            x_color_load('k');
+            x_palette_get('k');
             if(rand() % 2 == 0){
                 char number[10];
                 sprintf(number, "%d", rand() % 500 - 250);

@@ -14,29 +14,36 @@
 
 #define X_MAX_ITENS 1000 //max array itens
 
+typedef struct X_Color
+{
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
+    Uint8 a;
+} X_Color;
+
 //macro to create a color
-#define x_color_make(r, g, b, a) (SDL_Color){r, g, b, a}
+#define x_color_make(r, g, b, a) (X_Color){r, g, b, a}
 
 //macro to create a rect
 #define x_rect_make(x, y, w, h)  (SDL_Rect){x, y, w, h}
 
-#define x_v2d_make(x, y)         (x_V2d){x, y}
+#define x_v2d_make(x, y)         (X_V2d){x, y}
 
 //swap two variables
 #define X_SWAP(x, y, T) do { T X_SWAP = x; x = y; y = X_SWAP; } while (0)
 
-
 /* lista de cores default */
-extern const SDL_Color X_COLOR_RED;
-extern const SDL_Color X_COLOR_GREEN;
-extern const SDL_Color X_COLOR_BLUE;
-extern const SDL_Color X_COLOR_YELLOW;
-extern const SDL_Color X_COLOR_CYAN;
-extern const SDL_Color X_COLOR_MAGENTA;
-extern const SDL_Color X_COLOR_ORANGE;
-extern const SDL_Color X_COLOR_VIOLET;
-extern const SDL_Color X_COLOR_WHITE;
-extern const SDL_Color X_COLOR_BLACK;
+extern const X_Color X_COLOR_RED;
+extern const X_Color X_COLOR_GREEN;
+extern const X_Color X_COLOR_BLUE;
+extern const X_Color X_COLOR_YELLOW;
+extern const X_Color X_COLOR_CYAN;
+extern const X_Color X_COLOR_MAGENTA;
+extern const X_Color X_COLOR_ORANGE;
+extern const X_Color X_COLOR_VIOLET;
+extern const X_Color X_COLOR_WHITE;
+extern const X_Color X_COLOR_BLACK;
 
 //enumeration to Events handled
 typedef enum {X_EVENT_NOTHING = -1, X_EVENT_QUIT = 0, X_EVENT_LEFTCLICK = 1, X_EVENT_RIGHTCLICK = 2} x_EventType;
@@ -47,7 +54,7 @@ typedef struct{
     int width, height; //image size on screen
     int nl, nc;        //number of lines, number of columns, 
     int w_one, h_one;  //source size for one image
-}x_Sprite;
+}X_Sprite;
 
 //global var of store Window
 extern SDL_Window   * x_window;
@@ -59,7 +66,7 @@ extern SDL_Renderer * x_renderer;
 extern TTF_Font    * x_arr_fonts[X_MAX_ITENS];
 
 //global array to store sprites
-extern x_Sprite   * x_arr_sprites[X_MAX_ITENS];
+extern X_Sprite   * x_arr_sprites[X_MAX_ITENS];
 
 //global array to store sounds
 extern Mix_Chunk   * x_arr_chunks[X_MAX_ITENS];
@@ -68,7 +75,7 @@ extern Mix_Chunk   * x_arr_chunks[X_MAX_ITENS];
 extern Mix_Music   * x_arr_musics[X_MAX_ITENS];
 
 //global array to store colors
-extern SDL_Color     x_arr_colors[256];
+extern X_Color     x_arr_colors[256];
 
 //global var to store window width
 extern int x_window_width;
@@ -103,19 +110,19 @@ void x_plot(int x, int y);
 void x_write(int x, int y, const char * format, ...);
 
 //changes the color used do paint and write
-void x_color_set(SDL_Color color);
+void x_color_set(X_Color color);
 
 //changes the color used do paint and write using the color palette
 void x_color_change(Uint8 color);
 
 //get the current color used do paint and write
-SDL_Color x_color_get();
+X_Color x_color_get();
 
 //saves a color in index palette
 void x_palette_set(Uint8 index, int r, int g, int b, int a);
 
 //get a color from palette
-SDL_Color x_palette_get(Uint8 index);
+X_Color x_palette_get(Uint8 index);
 
 /* //stores a TTF font in x_arr_fonts and return the index. 
 int  x_font_save(const char * path, int size);
@@ -128,7 +135,7 @@ void x_font_load(int index); */
 void x_font_size(int size);
 
 //stores a SDL_Texture in x_arr_sprites and return the index.
-//the struct x_Sprite store informations about the number of images in the sprite
+//the struct X_Sprite store informations about the number of images in the sprite
 //and the dimensions os a single image
 //nl e nc are the number of lines and columns in a multi image file
 //if there is a single image, use nl = nc = 1
@@ -192,7 +199,7 @@ void x_get_mouse_pos(int * x, int * y);
 typedef struct{
     float x;
     float y;
-} x_V2d;
+} X_V2d;
 
 /* retorna o tamanho de um vetor da origem */
 float x_v2d_lenght(float x, float y);
@@ -201,19 +208,19 @@ float x_v2d_lenght(float x, float y);
 float x_v2d_distance(float ax, float ay, float bx, float by);
 
 /* retorna a + b */
-x_V2d x_v2d_sum(x_V2d a, x_V2d b);
+X_V2d x_v2d_sum(X_V2d a, X_V2d b);
 
 /* retorna a - b */
-x_V2d x_v2d_sub(x_V2d a, x_V2d b);
+X_V2d x_v2d_sub(X_V2d a, X_V2d b);
 
 /* retorna (a.x * value, a.y * value) */
-x_V2d x_v2d_dot(x_V2d a, float value);
+X_V2d x_v2d_dot(X_V2d a, float value);
 
 /* retorna o vetor normalizado */
-x_V2d x_v2d_normalize(x_V2d v);
+X_V2d x_v2d_normalize(X_V2d v);
 
 /* retorna o vetor orthogonal */
-x_V2d x_v2d_ortho(x_V2d v);
+X_V2d x_v2d_ortho(X_V2d v);
 
 /* ############################################### */
 /* ############ FUNÇÕES DE DESENHO DE LINHAS ##### */
@@ -302,26 +309,26 @@ SDL_Window * x_window; //janela
 SDL_Renderer * x_renderer; //renderizador do buffer
 int __x_font_size = 25;
 TTF_Font  * x_arr_fonts[X_MAX_ITENS];
-x_Sprite * x_arr_sprites[X_MAX_ITENS];
+X_Sprite  * x_arr_sprites[X_MAX_ITENS];
 Mix_Chunk * x_arr_chunks[X_MAX_ITENS];
 Mix_Music * x_arr_musics[X_MAX_ITENS];
-SDL_Color   x_arr_colors[256];
+X_Color   x_arr_colors[256];
 
 int x_window_width = 800;
 int x_window_height = 600;
 
-const SDL_Color X_COLOR_WHITE     = {238, 232, 213, 255};
-const SDL_Color X_COLOR_BLACK     = {7  , 54 , 66 , 255};
-const SDL_Color X_COLOR_GREEN     = {133, 153, 0  , 255};
-const SDL_Color X_COLOR_RED       = {211, 1  , 2  , 255};
-const SDL_Color X_COLOR_BLUE      = {38 , 139, 210, 255};
-const SDL_Color X_COLOR_YELLOW    = {181, 137, 0  , 255};
-const SDL_Color X_COLOR_CYAN      = {42 , 161, 152, 255};
-const SDL_Color X_COLOR_MAGENTA   = {211, 54 , 130, 255};
-const SDL_Color X_COLOR_ORANGE    = {253, 106,   2, 255};
-const SDL_Color X_COLOR_VIOLET    = {108, 113, 196, 255};
+const X_Color X_COLOR_WHITE     = {238, 232, 213, 255};
+const X_Color X_COLOR_BLACK     = {7  , 54 , 66 , 255};
+const X_Color X_COLOR_GREEN     = {133, 153, 0  , 255};
+const X_Color X_COLOR_RED       = {211, 1  , 2  , 255};
+const X_Color X_COLOR_BLUE      = {38 , 139, 210, 255};
+const X_Color X_COLOR_YELLOW    = {181, 137, 0  , 255};
+const X_Color X_COLOR_CYAN      = {42 , 161, 152, 255};
+const X_Color X_COLOR_MAGENTA   = {211, 54 , 130, 255};
+const X_Color X_COLOR_ORANGE    = {253, 106,   2, 255};
+const X_Color X_COLOR_VIOLET    = {108, 113, 196, 255};
 
-void x_color_set(SDL_Color color){
+void x_color_set(X_Color color){
     SDL_SetRenderDrawColor(x_renderer, color.r, color.g, color.b, color.a);
 }
 
@@ -329,8 +336,8 @@ void x_color_change(Uint8 color){
     x_color_set(x_arr_colors[color]);
 }
 
-SDL_Color x_color_get(){
-    SDL_Color color;
+X_Color x_color_get(){
+    X_Color color;
     SDL_GetRenderDrawColor(x_renderer, &color.r, &color.g, &color.b, &color.a);
     return color;
 }
@@ -340,7 +347,7 @@ void x_palette_set(Uint8 color, int r, int g, int b, int a){
     x_arr_colors[color] = x_color_make(r, g, b, a);
 }
 
-SDL_Color x_palette_get(Uint8 color){
+X_Color x_palette_get(Uint8 color){
     return x_arr_colors[color];
 }
 
@@ -500,7 +507,7 @@ void x_music_toggle_play(int index){
 }
 
 SDL_Rect x_sprite_get_rect_source(int index, int subindex){
-    x_Sprite * tex = x_arr_sprites[index];
+    X_Sprite * tex = x_arr_sprites[index];
     int qtd = tex->nl * tex->nc;
     int pos = subindex % qtd;
     if(pos < 0) 
@@ -510,14 +517,14 @@ SDL_Rect x_sprite_get_rect_source(int index, int subindex){
 }
 
 void x_sprite_draw(int index, int subindex, int x, int y){
-    x_Sprite * tex = x_arr_sprites[index];
+    X_Sprite * tex = x_arr_sprites[index];
     SDL_Rect source = x_sprite_get_rect_source(index, subindex);
     SDL_Rect dest = {x, y, x_arr_sprites[index]->width, x_arr_sprites[index]->height};
     SDL_RenderCopy(x_renderer, tex->texture, &source, &dest);
 }
 
 void x_sprite_draw_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip){
-    x_Sprite * tex = x_arr_sprites[index];
+    X_Sprite * tex = x_arr_sprites[index];
     SDL_Rect source = x_sprite_get_rect_source(index, subindex);
     SDL_Rect dest = {x, y, x_arr_sprites[index]->width, x_arr_sprites[index]->height};
     SDL_RenderCopyEx(x_renderer, tex->texture, &source, &dest, angle, NULL, flip);
@@ -527,7 +534,7 @@ int  x_sprite_load(const char * path, int nl, int nc, int width, int height){
     static int next_index = 0;
     int index = next_index;
     next_index++;
-    x_arr_sprites[index] = (x_Sprite *) malloc(sizeof(x_Sprite));
+    x_arr_sprites[index] = (X_Sprite *) malloc(sizeof(X_Sprite));
     SDL_Surface * image = SDL_LoadBMP(path);
     if(image == NULL){
         printf( "Error: %s\n", SDL_GetError() );
@@ -538,7 +545,7 @@ int  x_sprite_load(const char * path, int nl, int nc, int width, int height){
     x_arr_sprites[index]->width = width;
     x_arr_sprites[index]->height = height;
 
-    x_Sprite * stex = x_arr_sprites[index];
+    X_Sprite * stex = x_arr_sprites[index];
     stex->nl = nl;
     stex->nc = nc;
     int w = 0, h = 0;
@@ -619,19 +626,19 @@ float x_v2d_distance(float ax, float ay, float bx, float by){
     return x_v2d_lenght(bx - ax, by - ay);
 }
 
-x_V2d x_v2d_sum(x_V2d a, x_V2d b){
-    return (x_V2d){a.x + b.x, a.y + b.y};
+X_V2d x_v2d_sum(X_V2d a, X_V2d b){
+    return (X_V2d){a.x + b.x, a.y + b.y};
 }
 
-x_V2d x_v2d_sub(x_V2d a, x_V2d b){
-    return (x_V2d){a.x - b.x, a.y - b.y};
+X_V2d x_v2d_sub(X_V2d a, X_V2d b){
+    return (X_V2d){a.x - b.x, a.y - b.y};
 }
 
-x_V2d x_v2d_dot(x_V2d a, float value){
-    return (x_V2d){a.x * value, a.y  * value};
+X_V2d x_v2d_dot(X_V2d a, float value){
+    return (X_V2d){a.x * value, a.y  * value};
 }
 
-x_V2d x_v2d_normalize(x_V2d v){
+X_V2d x_v2d_normalize(X_V2d v){
     float lenght = x_v2d_lenght(v.x, v.y);
     if(lenght == 0)
         return v;
@@ -640,8 +647,8 @@ x_V2d x_v2d_normalize(x_V2d v){
     return v;
 }
 
-x_V2d x_v2d_ortho(x_V2d v){
-    return (x_V2d){v.y, -v.x};
+X_V2d x_v2d_ortho(X_V2d v){
+    return (X_V2d){v.y, -v.x};
 }
 
 void x_plot(int x, int y){
@@ -653,19 +660,19 @@ void x_draw_line(int x0, int y0, int x1, int y1){
 }
 
 void x_fill_line(float x0, float y0, float x1, float y1, int thickness){
-    x_V2d a = {x0, y0};
-    x_V2d b = {x1, y1};
+    X_V2d a = {x0, y0};
+    X_V2d b = {x1, y1};
     if(thickness == 1){
         x_draw_line(a.x, a.y, b.x, b.y);
         return;
     }
-    x_V2d _offset = {b.x - a.x, b.y - a.y};
+    X_V2d _offset = {b.x - a.x, b.y - a.y};
     _offset = x_v2d_dot(x_v2d_ortho(x_v2d_normalize(_offset)), (thickness/2.f));
 
-    x_V2d p1 = x_v2d_sub(a, _offset);
-    x_V2d p2 = x_v2d_sub(b, _offset);
-    x_V2d p3 = x_v2d_sum(a, _offset);
-    x_V2d p4 = x_v2d_sum(b, _offset);
+    X_V2d p1 = x_v2d_sub(a, _offset);
+    X_V2d p2 = x_v2d_sub(b, _offset);
+    X_V2d p3 = x_v2d_sum(a, _offset);
+    X_V2d p4 = x_v2d_sum(b, _offset);
 
     x_fill_triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
     x_fill_triangle(p3.x, p3.y, p2.x, p2.y, p4.x, p4.y);
@@ -708,16 +715,16 @@ void __x_fill_top_flat_triangle(float v1x, float v1y, float v2x, float v2y, floa
 
 void x_fill_triangle(float v1x, float v1y, float v2x, float v2y, float v3x, float v3y)
 {
-    x_V2d v1 = {v1x, v1y};
-    x_V2d v2 = {v2x, v2y};
-    x_V2d v3 = {v3x, v3y};
+    X_V2d v1 = {v1x, v1y};
+    X_V2d v2 = {v2x, v2y};
+    X_V2d v3 = {v3x, v3y};
     /* at first sort the three vertices by y-coordinate ascending so v1 is the topmost vertice */
     if((v2.y <= v1.y) && (v2.y <= v3.y))
-        X_SWAP(v1, v2, x_V2d);
+        X_SWAP(v1, v2, X_V2d);
     if((v3.y <= v1.y) && (v3.y <= v2.y))
-        X_SWAP(v1, v3, x_V2d);
+        X_SWAP(v1, v3, X_V2d);
     if(v3.y < v2.y)
-        X_SWAP(v2, v3, x_V2d);
+        X_SWAP(v2, v3, X_V2d);
 
     /* here we know that v1.y <= v2.y <= v3.y */
     /* check for trivial case of bottom-flat triangle */
@@ -728,7 +735,7 @@ void x_fill_triangle(float v1x, float v1y, float v2x, float v2y, float v3x, floa
     else
     {
         /* general case - split the triangle in a topflat and bottom-flat one */
-        x_V2d v4 = {0.f, 0.f};
+        X_V2d v4 = {0.f, 0.f};
         v4.x = (v1.x + ((float)(v2.y - v1.y) / (float)(v3.y - v1.y)) * (v3.x - v1.x));
         v4.y = v2.y;
         __x_fill_bottom_flat_triangle(v1.x, v1.y, v2.x, v2.y, v4.x, v4.y);
@@ -868,7 +875,7 @@ void x_fill_ellipse(int x0, int y0, int x1, int y1)
 void __x_plot_quad_bezier_seg(int x0, int y0, int x1, int y1, int x2, int y2)
 {
     int sx = x2-x1, sy = y2-y1;
-    long xx = x0-x1, yy = y0-y1, x_V2d;         /* relative values for checks */
+    long xx = x0-x1, yy = y0-y1, X_V2d;         /* relative values for checks */
     double dx, dy, err, cur = xx*sy-yy*sx;                    /* curvature */
 
     assert(xx*sx <= 0 && yy*sy <= 0);  /* sign of gradient must not change */
@@ -879,19 +886,19 @@ void __x_plot_quad_bezier_seg(int x0, int y0, int x1, int y1, int x2, int y2)
     if (cur != 0) {                                    /* no straight line */
         xx += sx; xx *= sx = x0 < x2 ? 1 : -1;           /* x step direction */
         yy += sy; yy *= sy = y0 < y2 ? 1 : -1;           /* y step direction */
-        x_V2d = 2*xx*yy; xx *= xx; yy *= yy;          /* differences 2nd degree */
+        X_V2d = 2*xx*yy; xx *= xx; yy *= yy;          /* differences 2nd degree */
         if (cur*sx*sy < 0) {                           /* negated curvature? */
-            xx = -xx; yy = -yy; x_V2d = -x_V2d; cur = -cur;
+            xx = -xx; yy = -yy; X_V2d = -X_V2d; cur = -cur;
         }
-        dx = 4.0*sy*cur*(x1-x0)+xx-x_V2d;             /* differences 1st degree */
-        dy = 4.0*sx*cur*(y0-y1)+yy-x_V2d;
-        xx += xx; yy += yy; err = dx+dy+x_V2d;                /* error 1st step */
+        dx = 4.0*sy*cur*(x1-x0)+xx-X_V2d;             /* differences 1st degree */
+        dy = 4.0*sx*cur*(y0-y1)+yy-X_V2d;
+        xx += xx; yy += yy; err = dx+dy+X_V2d;                /* error 1st step */
         do {
             x_plot(x0,y0);                                     /* plot curve */
             if (x0 == x2 && y0 == y2) return;  /* last pixel -> curve finished */
             y1 = 2*err < dx;                  /* save value for test of y step */
-            if (2*err > dy) { x0 += sx; dx -= x_V2d; err += dy += yy; } /* x step */
-            if (    y1    ) { y0 += sy; dy -= x_V2d; err += dx += xx; } /* y step */
+            if (2*err > dy) { x0 += sx; dx -= X_V2d; err += dy += yy; } /* x step */
+            if (    y1    ) { y0 += sy; dy -= X_V2d; err += dx += xx; } /* y step */
         } while (dy < dx );           /* gradient negates -> algorithm fails */
     }
     x_draw_line(x0,y0, x2,y2);                  /* plot remaining part to end */
@@ -973,7 +980,7 @@ static int32_t __COS(int d) {
 
 //begin should be smaller than end, and both must be in interval [0, 360]
 void __x_fill_arc(float centerx, float centery, int radius, int thickness, int degrees_begin, int degrees_end) {
-    x_V2d center = {centerx, centery};
+    X_V2d center = {centerx, centery};
     float sslope = (float)__COS(degrees_begin) / (float)__SIN(degrees_begin);
     float eslope = (float)__COS(degrees_end) / (float)__SIN(degrees_end);
 

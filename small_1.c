@@ -1,6 +1,15 @@
 #define X_FULL
 #include "sh.h"
 
+
+/* void      x_color_set(r, g, b)
+void      x_color_change(char)
+SDL_Color x_color_get()
+
+void      x_palette_set(char, r, g, b, a)   save
+SDL_Color x_color_get(char)                 load, combina com os loads que retornam indices
+ */
+
 typedef struct {
     int x, y;
 } XY;
