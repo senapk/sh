@@ -2,13 +2,6 @@
 #include "sh.h"
 
 
-/* void      x_color_set(r, g, b)
-void      x_color_change(char)
-SDL_Color x_color_get()
-
-void      x_palette_set(char, r, g, b, a)   save
-SDL_Color x_color_get(char)                 load, combina com os loads que retornam indices
- */
 
 typedef struct {
     int x, y;
@@ -19,6 +12,8 @@ XY vdesl[] = {{-1, 0}, {0, -1}, {1, 0}, {0, +1}, {0, 0}};
 
 int main(){
     x_open(800, 600, "small");
+    int FONT_SCRIPT = x_font_load("script12.ttf");
+    int FONT_PIXEL = x_font_load("pixel.ttf");
     int x = 100, y = 100, dir = 2;
     int ev;
     int cont = 0;
@@ -39,9 +34,16 @@ int main(){
         y += 3 * vdesl[dir].y;
 
         x_color_change('k'); x_clear();
-        x_color_change('w'); x_write(0, 0, "control the square using directional keys");
+        x_font_set_size(20);
+        x_font_set(0);
+        x_font_set(FONT_SCRIPT);
+        x_color_change('w'); x_write(0, 30, "control the SQUARE using directional keys");
+        
         x_color_change('y'); x_fill_arc(x, y, 50, 40, 0, 360);
         x_color_change('r'); x_fill_arc(x, y, 50, 30, 270, 140);
+        x_font_set_size(50);
+        x_font_set(FONT_SCRIPT);
+        x_color_change('w'); x_write(0, 140, "control the square using directional keys");
 
         cont += 5;
         x_plot(100, 100);

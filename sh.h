@@ -13,6 +13,7 @@
 #include <inttypes.h>
 
 #define X_MAX_ITENS 1000 //max array itens
+#define X_MAX_FONT_SIZE 1000 //max array itens
 
 typedef struct X_Color
 {
@@ -28,6 +29,7 @@ typedef struct X_Color
 //macro to create a rect
 #define x_rect_make(x, y, w, h)  (SDL_Rect){x, y, w, h}
 
+//make a v2d
 #define x_v2d_make(x, y)         (X_V2d){x, y}
 
 //swap two variables
@@ -63,7 +65,8 @@ extern SDL_Window   * x_window;
 extern SDL_Renderer * x_renderer;
 
 //global array to store fonts
-extern TTF_Font    * x_arr_fonts[X_MAX_ITENS];
+extern char          x_arr_font_paths[X_MAX_ITENS][100];
+extern TTF_Font    * x_arr_fonts[X_MAX_ITENS][X_MAX_FONT_SIZE];
 
 //global array to store sprites
 extern X_Sprite   * x_arr_sprites[X_MAX_ITENS];
@@ -124,15 +127,15 @@ void x_palette_set(Uint8 index, int r, int g, int b, int a);
 //get a color from palette
 X_Color x_palette_get(Uint8 index);
 
-/* //stores a TTF font in x_arr_fonts and return the index. 
-int  x_font_save(const char * path, int size);
+//stores a TTF font in x_arr_fonts and return the index. 
+int  x_font_load(const char * path);
 
 //selects a font from x_arr_fonts to use in x_write.
 //use 0 for default font
-void x_font_load(int index); */
+//void x_font_load(int index); */
 
 //changes font size
-void x_font_size(int size);
+void x_font_set_size(int size);
 
 //stores a SDL_Texture in x_arr_sprites and return the index.
 //the struct X_Sprite store informations about the number of images in the sprite
@@ -307,12 +310,14 @@ void x_grid_number(int l, int c, int number);
 
 SDL_Window * x_window; //janela
 SDL_Renderer * x_renderer; //renderizador do buffer
-int __x_font_size = 25;
-TTF_Font  * x_arr_fonts[X_MAX_ITENS];
+int         __x_current_font_size = 25;
+int         __x_current_font = 0;
+char        x_arr_font_paths[X_MAX_ITENS][100];
+TTF_Font  * x_arr_fonts[X_MAX_ITENS][X_MAX_ITENS];//fonts x font_size
 X_Sprite  * x_arr_sprites[X_MAX_ITENS];
 Mix_Chunk * x_arr_chunks[X_MAX_ITENS];
 Mix_Music * x_arr_musics[X_MAX_ITENS];
-X_Color   x_arr_colors[256];
+X_Color     x_arr_colors[256];
 
 int x_window_width = 800;
 int x_window_height = 600;
@@ -411,12 +416,14 @@ void x_open(int width, int height, const char * title){
         exit(1);
     }
     for(int i = 0; i < X_MAX_ITENS; i++){
-        x_arr_fonts[i] = NULL;
+        for(int j = 0; j < X_MAX_FONT_SIZE; j++)
+            x_arr_fonts[i][j] = NULL;
         x_arr_sprites[i] = NULL;
         x_arr_chunks[i] = NULL;
+        strcpy(x_arr_font_paths[i], "");
     }
     TTF_Init();
-    x_font_size(25);
+    x_font_set_size(__x_current_font_size);
 
     for(int i = 0; i < 256; i++)
         x_arr_colors[i] = x_color_make(255, 255, 255, 255);
@@ -444,8 +451,9 @@ void x_open(int width, int height, const char * title){
 
 void x_close(){
     for(int i = 0; i < X_MAX_ITENS; i++){
-        if(x_arr_fonts[i])
-            TTF_CloseFont(x_arr_fonts[i]);
+        for(int j = 0; j < X_MAX_FONT_SIZE; j++)
+            if(x_arr_fonts[i][j])
+                TTF_CloseFont(x_arr_fonts[i][j]);
         if(x_arr_sprites[i]){
             SDL_DestroyTexture(x_arr_sprites[i]->texture);
             free(x_arr_sprites[i]);
@@ -579,7 +587,7 @@ void x_write(int x, int y, const char * format, ...){
     Uint8 r, g, b, a;
     SDL_GetRenderDrawColor(x_renderer, &r, &g, &b, &a);
     SDL_Color color = {r, g, b, a};
-    SDL_Surface * surface = TTF_RenderText_Solid(x_arr_fonts[__x_font_size], text, color);
+    SDL_Surface * surface = TTF_RenderText_Solid(x_arr_fonts[__x_current_font][__x_current_font_size], text, color);
     SDL_Texture * texture = SDL_CreateTextureFromSurface(x_renderer, surface);
     int texW = 0;
     int texH = 0;
@@ -590,31 +598,45 @@ void x_write(int x, int y, const char * format, ...){
     SDL_FreeSurface(surface);
 }
 
-/* int x_font_save(const char * path, int size){
+int x_font_load(const char * path){
     static int next_index = 1;
     int index = next_index;
+    int size = __x_current_font_size;
     next_index += 1;
-    x_arr_fonts[index] = TTF_OpenFont(path, size);
-    if(!x_arr_fonts[index]) {
+    strcpy(x_arr_font_paths[index], path);
+
+    x_arr_fonts[index][size] = TTF_OpenFont(path, size);
+    if(!x_arr_fonts[index][size]) {
         printf("Error: TTF_OpenFont: %s\n", TTF_GetError());
         exit(1);
     }
     return index;
 }
 
-void x_font_load(int index){
-    if(x_arr_fonts[index] == NULL){
-        printf("Error: font index %d do not found\n", index);
+void x_font_set(int index){
+    if(index < 0 || index >= X_MAX_ITENS){
+        printf("font index %d out of limits [0, %d[\n", index, X_MAX_ITENS);
         exit(1);
     }
-    __x_font_size = index;
-} */
+    if((index != 0) && strcmp(x_arr_font_paths[index], "") == 0){
+        printf("font index %d not loaded\n", index);
+        exit(1);
+    }
+    __x_current_font = index;
+    x_font_set_size(__x_current_font_size);
+}
 
-void x_font_size(int size){
-    TTF_Font * font = x_arr_fonts[size];
-    __x_font_size = size;
-    if(font == NULL){
-        x_arr_fonts[__x_font_size] = TTF_OpenFontRW(SDL_RWFromConstMem(__x_font_buffer_profont, sizeof(__x_font_buffer_profont)), 1, __x_font_size);
+void x_font_set_size(int size){
+    if(size < 0 || size >= X_MAX_FONT_SIZE){
+        printf("font size of out limits %d. [0, %d[\n", size, X_MAX_ITENS);
+        return;
+    }
+    __x_current_font_size = size;
+    if(x_arr_fonts[__x_current_font][__x_current_font_size] == NULL){
+        if(__x_current_font == 0)
+            x_arr_fonts[0][__x_current_font_size] = TTF_OpenFontRW(SDL_RWFromConstMem(__x_font_buffer_profont, sizeof(__x_font_buffer_profont)), 1, __x_current_font_size);
+        else
+            x_arr_fonts[__x_current_font][__x_current_font_size] = TTF_OpenFont(x_arr_font_paths[__x_current_font], __x_current_font_size);
     }
 }
 
@@ -1087,7 +1109,7 @@ void x_grid_text(int l, int c, const char * text){
         fsize = 0.35; xdelta = 0.1; ydelta = 0.35;
         text2[5] = '\0';
     }
-    x_font_size(__x_GRID_SIDE * fsize * font_factor);   
+    x_font_set_size(__x_GRID_SIDE * fsize * font_factor);   
     x_write((c + xdelta) * __x_GRID_SIDE, (l + ydelta) * __x_GRID_SIDE, "%s", text2);
     
 }

@@ -3,7 +3,7 @@
 
 int main(){
     x_open(1000, 600, "desenho");
-    x_font_size(18);
+    x_font_set_size(18);
     while(x_has_events(NULL)){
         x_color_change('k');
         x_clear();
