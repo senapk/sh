@@ -151,6 +151,7 @@ int x_load_sprite(const char * path, int nl, int nc, int width, int height);
 void x_draw_sprite(int index, int subindex, int x, int y);
 
 //draw the image using a rotation angle in degrees
+//angle  rotating it in a counter clockwise direction
 //flip value can be SDL_FLIP_HORIZONTAL, SDL_FLIP_VERTICAL or SDL_FLIP_NONE
 void x_draw_sprite_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip);
 
@@ -535,7 +536,7 @@ void x_draw_sprite_rot(int index, int subindex, int x, int y, double angle, SDL_
     X_Sprite * tex = x_arr_sprites[index];
     SDL_Rect source = x_get_sprite_rect_source(index, subindex);
     SDL_Rect dest = {x, y, x_arr_sprites[index]->width, x_arr_sprites[index]->height};
-    SDL_RenderCopyEx(x_renderer, tex->texture, &source, &dest, angle, NULL, flip);
+    SDL_RenderCopyEx(x_renderer, tex->texture, &source, &dest, -angle, NULL, flip);
 }
 
 int  x_load_sprite(const char * path, int nl, int nc, int width, int height){
