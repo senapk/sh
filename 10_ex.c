@@ -5,7 +5,7 @@
 
 int main(){
     x_open(800, 600, "sei la");
-    int TEX_SHIP = x_sprite_load("ships.bmp", 2, 5, 50, 50);
+    int TEX_SHIP = x_load_sprite("ships.bmp", 2, 5, 50, 50);
     int timer = 0;
     int ind = 0;
     int dir = 1;
@@ -29,7 +29,7 @@ int main(){
 
         X_CC('k');
         //x_clear();
-        x_color_set(x_color_make(155, 155, 155, 255));
+        x_set_color(x_make_color(155, 155, 155, 255));
         x_write(0, 0, 0, "press q to leave");
         int x, y;
         x_get_mouse_pos(&x, &y);
@@ -39,7 +39,7 @@ int main(){
             if(ind == 0 || ind == 4)
                 dir *= -1;
         }
-        x_sprite_draw(TEX_SHIP, ind, 200, 200);
+        x_draw_sprite(TEX_SHIP, ind, 200, 200);
         x_display();
     }
     x_close();

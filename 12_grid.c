@@ -2,17 +2,17 @@
 #include "sh.h"
 
 void show_mat(int nl, int nc, char mat[nl][nc]){
-    x_palette_get('w');
+    x_get_palette('w');
     x_clear();
     char * colors = "rgbymcov";
     int l, c;
     for(l = 0; l < nl; l++)
         for(c = 0; c < nc; c++){
-            x_palette_get(mat[l][c]);
+            x_get_palette(mat[l][c]);
             x_grid_square(l, c);
-            x_palette_get(colors[(c + l) % strlen(colors)]);
+            x_get_palette(colors[(c + l) % strlen(colors)]);
             x_grid_circle(l, c);
-            x_palette_get('k');
+            x_get_palette('k');
             if(rand() % 2 == 0){
                 char number[10];
                 sprintf(number, "%d", rand() % 500 - 250);
@@ -30,8 +30,8 @@ int main(){
     x_open(w, h);
     x_grid_init(side, 1);
     
-    int MUSIC_ROCK = x_music_load("rock.ogg");
-    x_music_toggle_play(MUSIC_ROCK);
+    int MUSIC_ROCK = x_load_music("rock.ogg");
+    x_play_music_toggle(MUSIC_ROCK);
 
     int nl = h / side, nc = w / side;
     char mat[nl][nc];

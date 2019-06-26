@@ -39,7 +39,7 @@ Cobra gerar_cobra(){
 X_V2d vet_dir[4] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 
 void draw_square(Bloco bloco){
-    x_palette_get(bloco.cor);
+    x_get_palette(bloco.cor);
     XY pos = bloco.pos;
     pos.x *= LADO;
     pos.y *= LADO;
@@ -62,14 +62,15 @@ void dar_a_volta(XY * pos){
 
 int main(){
     int speed = 300;
-    x_open(NC * LADO, NL * LADO);
+    x_open(NC * LADO, NL * LADO, "croba");
     int pontos = 0;
     Cobra cobra = gerar_cobra();
     Bloco food = gerar_bloco_aleat();
 
     int timer = 0;
+    int c;
     while(true){
-        int c = x_get_event();
+        int c = x_get_event(NULL);
         if(c == X_EVENT_QUIT){
             break;
         }else if(c == SDLK_RIGHT){
@@ -98,12 +99,12 @@ int main(){
             cobra.size += 1;
             food = gerar_bloco_aleat();
             pontos += 1;
-            speed *= 0.8;
+            speed *= 0.9;
         }
 
-        x_palette_get('k');
+        x_get_palette('k');
         x_clear();
-        x_palette_get('w');
+        x_get_palette('w');
         for(int i = 0; i < cobra.size; i++)
             draw_square(cobra.corpo[i]);
         draw_square(food);

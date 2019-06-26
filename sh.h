@@ -24,13 +24,13 @@ typedef struct X_Color
 } X_Color;
 
 //macro to create a color
-#define x_color_make(r, g, b, a) (X_Color){r, g, b, a}
+#define x_make_color(r, g, b, a) (X_Color){r, g, b, a}
 
 //macro to create a rect
-#define x_rect_make(x, y, w, h)  (SDL_Rect){x, y, w, h}
+#define x_make_rect(x, y, w, h)  (SDL_Rect){x, y, w, h}
 
 //make a v2d
-#define x_v2d_make(x, y)         (X_V2d){x, y}
+#define x_make_v2d(x, y)         (X_V2d){x, y}
 
 //swap two variables
 #define X_SWAP(x, y, T) do { T X_SWAP = x; x = y; y = X_SWAP; } while (0)
@@ -48,7 +48,7 @@ extern const X_Color X_COLOR_WHITE;
 extern const X_Color X_COLOR_BLACK;
 
 //enumeration to Events handled
-typedef enum {X_EVENT_NOTHING = -1, X_EVENT_QUIT = 0, X_EVENT_LEFTCLICK = 1, X_EVENT_RIGHTCLICK = 2} x_EventType;
+typedef enum {X_EVENT_NOTHING = -1, X_EVENT_QUIT = 0, X_EVENT_LEFTCLICK = 1, X_EVENT_RIGHTCLICK = 2} X_EventType;
 
 //struct to store Textures and informations about sprites
 typedef struct{
@@ -113,29 +113,29 @@ void x_plot(int x, int y);
 void x_write(int x, int y, const char * format, ...);
 
 //changes the color used do paint and write
-void x_color_set(X_Color color);
+void x_set_color(X_Color color);
 
 //changes the color used do paint and write using the color palette
-void x_color_change(Uint8 color);
+void x_set_pcolor(Uint8 color);
 
 //get the current color used do paint and write
-X_Color x_color_get();
+X_Color x_get_color();
 
 //saves a color in index palette
-void x_palette_set(Uint8 index, int r, int g, int b, int a);
+void x_set_palette(Uint8 index, int r, int g, int b, int a);
 
 //get a color from palette
-X_Color x_palette_get(Uint8 index);
+X_Color x_get_palette(Uint8 index);
 
 //stores a TTF font in x_arr_fonts and return the index. 
-int  x_font_load(const char * path);
+int  x_load_font(const char * path);
 
 //selects a font from x_arr_fonts to use in x_write.
 //use 0 for default font
-//void x_font_load(int index); */
+//void x_load_font(int index); */
 
 //changes font size
-void x_font_set_size(int size);
+void x_set_font_size(int size);
 
 //stores a SDL_Texture in x_arr_sprites and return the index.
 //the struct X_Sprite store informations about the number of images in the sprite
@@ -143,32 +143,32 @@ void x_font_set_size(int size);
 //nl e nc are the number of lines and columns in a multi image file
 //if there is a single image, use nl = nc = 1
 //width and height are the output dimensions 
-int x_sprite_load(const char * path, int nl, int nc, int width, int height);
+int x_load_sprite(const char * path, int nl, int nc, int width, int height);
 
 //draw the sprite on screen
 //if is a multi image sprite, use subindex to select the image to be displayed
 //in a single image, use subindex == 0
-void x_sprite_draw(int index, int subindex, int x, int y);
+void x_draw_sprite(int index, int subindex, int x, int y);
 
 //draw the image using a rotation angle in degrees
 //flip value can be SDL_FLIP_HORIZONTAL, SDL_FLIP_VERTICAL or SDL_FLIP_NONE
-void x_sprite_draw_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip);
+void x_draw_sprite_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip);
 
 //returns the source rect in the texture select by index using.
-SDL_Rect x_sprite_get_rect_source(int index, int subindex);
+SDL_Rect x_get_sprite_rect_source(int index, int subindex);
 
 //stores a Mix_Chunk in x_arr_sounds and return the index. 
-int  x_sound_load(const char * path);
+int  x_load_sound(const char * path);
 
 //play the sound once for loops == 0
 //use loop > 0 to repeat sound
-void x_sound_play(int index, int loops);
+void x_play_sound(int index, int loops);
 
 //stores the Mix_Music in x_arr_musics and return the index. 
-int  x_music_load(const char * path);
+int  x_load_music(const char * path);
 
 //play and resume the music
-void x_music_toggle_play(int index);
+void x_play_music_toggle(int index);
 
 //controls a timer
 //if the amount of time in milisseconds was passed, the function returns true and the time is updated
@@ -184,7 +184,7 @@ void x_delay(int ms);
 //if a SDL_MOUSEBUTTONDOWN was found, event receives X_EVENT_LEFTCLICK (1) or X_EVENT_RIGHTCLICK (2)
 //if none of these events was found, event receives X_EVENT_NOTHING (-1)
 //if var event is no NULL, it is filled with event found
-int x_has_events(int * event);
+int x_get_event(int * event);
 
 //receive a SDLK_Key returns if the key is pressed
 bool x_is_key_pressed(int key);
@@ -333,26 +333,26 @@ const X_Color X_COLOR_MAGENTA   = {211, 54 , 130, 255};
 const X_Color X_COLOR_ORANGE    = {253, 106,   2, 255};
 const X_Color X_COLOR_VIOLET    = {108, 113, 196, 255};
 
-void x_color_set(X_Color color){
+void x_set_color(X_Color color){
     SDL_SetRenderDrawColor(x_renderer, color.r, color.g, color.b, color.a);
 }
 
-void x_color_change(Uint8 color){
-    x_color_set(x_arr_colors[color]);
+void x_set_pcolor(Uint8 color){
+    x_set_color(x_arr_colors[color]);
 }
 
-X_Color x_color_get(){
+X_Color x_get_color(){
     X_Color color;
     SDL_GetRenderDrawColor(x_renderer, &color.r, &color.g, &color.b, &color.a);
     return color;
 }
 
 
-void x_palette_set(Uint8 color, int r, int g, int b, int a){
-    x_arr_colors[color] = x_color_make(r, g, b, a);
+void x_set_palette(Uint8 color, int r, int g, int b, int a){
+    x_arr_colors[color] = x_make_color(r, g, b, a);
 }
 
-X_Color x_palette_get(Uint8 color){
+X_Color x_get_palette(Uint8 color){
     return x_arr_colors[color];
 }
 
@@ -396,7 +396,7 @@ bool __x_poll_event(int * event){
     return false;
 }
 
-int x_has_events(int * event){
+int x_get_event(int * event){
     int ev;
     __x_poll_event(&ev);
     if(event != NULL)
@@ -423,10 +423,10 @@ void x_open(int width, int height, const char * title){
         strcpy(x_arr_font_paths[i], "");
     }
     TTF_Init();
-    x_font_set_size(__x_current_font_size);
+    x_set_font_size(__x_current_font_size);
 
     for(int i = 0; i < 256; i++)
-        x_arr_colors[i] = x_color_make(255, 255, 255, 255);
+        x_arr_colors[i] = x_make_color(255, 255, 255, 255);
 
     x_arr_colors['r'] = X_COLOR_RED;
     x_arr_colors['g'] = X_COLOR_GREEN;
@@ -441,10 +441,10 @@ void x_open(int width, int height, const char * title){
 
     /*https://htmlcolorcodes.com/color-names/*/
 
-    x_arr_colors[' '] = x_color_make(230, 230, 250, 255); /*khaki*/
-    x_arr_colors['.'] = x_color_make(240, 230, 140, 255); /*lavender*/
-    x_arr_colors['#'] = x_color_make(25, 25, 112, 255); /*midnight blue*/
-    x_arr_colors['x'] = x_color_make(255, 99, 71, 255); /*tomato*/
+    x_arr_colors[' '] = x_make_color(230, 230, 250, 255); /*khaki*/
+    x_arr_colors['.'] = x_make_color(240, 230, 140, 255); /*lavender*/
+    x_arr_colors['#'] = x_make_color(25, 25, 112, 255); /*midnight blue*/
+    x_arr_colors['x'] = x_make_color(255, 99, 71, 255); /*tomato*/
 
     srand(time(NULL));
 }
@@ -475,7 +475,7 @@ void x_display(){
     SDL_RenderPresent(x_renderer);
 }
 
-int x_sound_load(const char * path){
+int x_load_sound(const char * path){
     static int next_index = 0;
     int index = next_index;
     next_index += 1;
@@ -487,7 +487,7 @@ int x_sound_load(const char * path){
     return index;
 }
 
-int x_music_load(const char * path){
+int x_load_music(const char * path){
     static int next_index = 0;
     int index = next_index;
     next_index += 1;
@@ -499,11 +499,11 @@ int x_music_load(const char * path){
     return index;
 }
 
-void x_sound_play(int index, int loops){
+void x_play_sound(int index, int loops){
     Mix_PlayChannel(-1, x_arr_chunks[index], loops);
 }
 
-void x_music_toggle_play(int index){
+void x_play_music_toggle(int index){
     if( Mix_PlayingMusic() == 0 )//musica ainda nao esta tocando 
         Mix_PlayMusic(x_arr_musics[index], -1 ); //coloque pra tocar
     else { //musica ja iniciou
@@ -514,7 +514,7 @@ void x_music_toggle_play(int index){
     }
 }
 
-SDL_Rect x_sprite_get_rect_source(int index, int subindex){
+SDL_Rect x_get_sprite_rect_source(int index, int subindex){
     X_Sprite * tex = x_arr_sprites[index];
     int qtd = tex->nl * tex->nc;
     int pos = subindex % qtd;
@@ -524,21 +524,21 @@ SDL_Rect x_sprite_get_rect_source(int index, int subindex){
     return source;
 }
 
-void x_sprite_draw(int index, int subindex, int x, int y){
+void x_draw_sprite(int index, int subindex, int x, int y){
     X_Sprite * tex = x_arr_sprites[index];
-    SDL_Rect source = x_sprite_get_rect_source(index, subindex);
+    SDL_Rect source = x_get_sprite_rect_source(index, subindex);
     SDL_Rect dest = {x, y, x_arr_sprites[index]->width, x_arr_sprites[index]->height};
     SDL_RenderCopy(x_renderer, tex->texture, &source, &dest);
 }
 
-void x_sprite_draw_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip){
+void x_draw_sprite_rot(int index, int subindex, int x, int y, double angle, SDL_RendererFlip flip){
     X_Sprite * tex = x_arr_sprites[index];
-    SDL_Rect source = x_sprite_get_rect_source(index, subindex);
+    SDL_Rect source = x_get_sprite_rect_source(index, subindex);
     SDL_Rect dest = {x, y, x_arr_sprites[index]->width, x_arr_sprites[index]->height};
     SDL_RenderCopyEx(x_renderer, tex->texture, &source, &dest, angle, NULL, flip);
 }
 
-int  x_sprite_load(const char * path, int nl, int nc, int width, int height){
+int  x_load_sprite(const char * path, int nl, int nc, int width, int height){
     static int next_index = 0;
     int index = next_index;
     next_index++;
@@ -598,7 +598,7 @@ void x_write(int x, int y, const char * format, ...){
     SDL_FreeSurface(surface);
 }
 
-int x_font_load(const char * path){
+int x_load_font(const char * path){
     static int next_index = 1;
     int index = next_index;
     int size = __x_current_font_size;
@@ -623,10 +623,10 @@ void x_font_set(int index){
         exit(1);
     }
     __x_current_font = index;
-    x_font_set_size(__x_current_font_size);
+    x_set_font_size(__x_current_font_size);
 }
 
-void x_font_set_size(int size){
+void x_set_font_size(int size){
     if(size < 0 || size >= X_MAX_FONT_SIZE){
         printf("font size of out limits %d. [0, %d[\n", size, X_MAX_ITENS);
         return;
@@ -1109,7 +1109,7 @@ void x_grid_text(int l, int c, const char * text){
         fsize = 0.35; xdelta = 0.1; ydelta = 0.35;
         text2[5] = '\0';
     }
-    x_font_set_size(__x_GRID_SIDE * fsize * font_factor);   
+    x_set_font_size(__x_GRID_SIDE * fsize * font_factor);   
     x_write((c + xdelta) * __x_GRID_SIDE, (l + ydelta) * __x_GRID_SIDE, "%s", text2);
     
 }
