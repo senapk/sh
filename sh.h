@@ -372,7 +372,7 @@ void x_get_mouse_pos(int * x, int * y){
     SDL_GetMouseState(x, y);
 }
 
-bool __x_poll_event(int * event){
+bool x_poll_event(int * event){
     SDL_Event ev;
     while(SDL_PollEvent(&ev)){
         if(ev.type == SDL_QUIT){ 
@@ -399,7 +399,7 @@ bool __x_poll_event(int * event){
 
 int x_get_event(int * event){
     int ev;
-    __x_poll_event(&ev);
+    x_poll_event(&ev);
     if(event != NULL)
         *event = ev;
     return ev;

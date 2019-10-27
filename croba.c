@@ -1,10 +1,10 @@
 #define X_FULL
 #include "sh.h"
 
-
 const int LADO = 50;
 int NL = 12;
 int NC = 16;
+
 typedef struct{
     int x, y;
 } XY;
@@ -64,29 +64,32 @@ int main(){
     int speed = 300;
     x_open(NC * LADO, NL * LADO, "croba");
     int pontos = 0;
+    puts("oi");
     Cobra cobra = gerar_cobra();
     Bloco food = gerar_bloco_aleat();
-
+    x_set_font_size(18);
     int timer = 0;
+    bool is_open = true;
     int c;
-    while(true){
-        int c = x_get_event(NULL);
-        if(c == X_EVENT_QUIT){
-            break;
-        }else if(c == SDLK_RIGHT){
-            cobra.dir = 2;
-        }else if(c == SDLK_LEFT){
-            cobra.dir = 0;
-        }else if(c == SDLK_UP){
-            cobra.dir = 1;
-        }else if(c == SDLK_DOWN){
-            cobra.dir = 3;
+    while(is_open){
+        puts("tim");
+        while(x_poll_event(&c)){
+            if(c == X_EVENT_QUIT){
+                is_open = false;
+            }else if(c == SDLK_RIGHT){
+                cobra.dir = 2;
+            }else if(c == SDLK_LEFT){
+                cobra.dir = 0;
+            }else if(c == SDLK_UP){
+                cobra.dir = 1;
+            }else if(c == SDLK_DOWN){
+                cobra.dir = 3;
+            }
         }
-
+        /*
         if(x_timer(&timer, speed)){
             for(int i = cobra.size - 1; i >= 1; i--)
                 cobra.corpo[i].pos = cobra.corpo[i - 1].pos;
-            timer = SDL_GetTicks();
             cobra.corpo[0].pos.x += vet_dir[cobra.dir].x;
             cobra.corpo[0].pos.y += vet_dir[cobra.dir].y;
         }
@@ -101,14 +104,15 @@ int main(){
             pontos += 1;
             speed *= 0.9;
         }
+        */
 
-        x_get_palette('k');
+        x_set_color(x_get_palette('b'));
         x_clear();
-        x_get_palette('w');
-        for(int i = 0; i < cobra.size; i++)
-            draw_square(cobra.corpo[i]);
-        draw_square(food);
-        x_write(0, 0, 0, "pontos %d", pontos);
+        x_set_color(x_get_palette('w'));
+        //for(int i = 0; i < cobra.size; i++)
+        //    draw_square(cobra.corpo[i]);
+        //draw_square(food);
+        x_write(0, 0, "pontos");
         x_display();
     }
     x_close();

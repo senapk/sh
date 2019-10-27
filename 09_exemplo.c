@@ -53,7 +53,6 @@ int main(void) {
     
     int SOUND_RING = x_load_sound( "sonic.wav");
     int SOUND_SHOT = x_load_sound("shot.wav");
-
     int MUSIC_ROCK = x_load_music("rock.ogg");
     x_play_music_toggle(MUSIC_ROCK);
 
@@ -133,7 +132,7 @@ int main(void) {
             quicar_dentro(&aliens[i], lado);
 
         for(int i = 0 ; i < qtd; i++){
-            float dist = y_xy_distance(x, y, alien[i].x, alien[i].y);
+            float dist = x_v2d_distance(x, y, aliens[i].x, aliens[i].y);
             if(dist < lado){
                 if(x_timer(&timer_hit, 500)){
                     aliens[i].cont += 1;
