@@ -23,6 +23,11 @@ typedef struct X_Color
     Uint8 a;
 } X_Color;
 
+typedef struct X_ColorEntry{
+    char key[20];
+    X_Color color;
+} X_ColorEntry;
+
 //macro to create a color
 #define x_make_color(r, g, b, a) (X_Color){r, g, b, a}
 
@@ -78,7 +83,7 @@ extern Mix_Chunk   * x_arr_chunks[X_MAX_ITENS];
 extern Mix_Music   * x_arr_musics[X_MAX_ITENS];
 
 //global array to store colors
-extern X_Color     x_arr_colors[256];
+extern X_ColorEntry x_arr_colors[X_MAX_ITENS];
 
 //global var to store window width
 extern int x_window_width;
@@ -95,14 +100,8 @@ extern unsigned char __x_font_buffer_profont[46628];
 //globals x_window_height e x_window_width will store the window dimensions
 void x_open(int width, int height, const char * title);
 
-//finalizes the sdl and all resources allocated
-void x_close();
-
-//clear the screen
+//clear the screen using the current color
 void x_clear();
-
-//show all objects drawed
-void x_display();
 
 //plots a pixel in screen using the default color
 void x_plot(int x, int y);
@@ -113,19 +112,13 @@ void x_plot(int x, int y);
 void x_write(int x, int y, const char * format, ...);
 
 //changes the color used do paint and write
-void x_set_color(X_Color color);
+void x_set_color(const char * color);
 
-//changes the color used do paint and write using the color palette
-void x_set_pcolor(Uint8 color);
+//changes the color used do paint and write using rgba
+void x_set_color_rgba(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
 //get the current color used do paint and write
 X_Color x_get_color();
-
-//saves a color in index palette
-void x_set_palette(Uint8 index, int r, int g, int b, int a);
-
-//get a color from palette
-X_Color x_get_palette(Uint8 index);
 
 //stores a TTF font in x_arr_fonts and return the index. 
 int  x_load_font(const char * path);
@@ -173,7 +166,7 @@ void x_play_music_toggle(int index);
 
 //controls a timer
 //if the amount of time in milisseconds was passed, the function returns true and the time is updated
-bool x_timer(int * timer, int ms);
+bool x_time_elapsed(int * timer, int ms);
 
 //sleep for this amount of time in milisseconds
 void x_delay(int ms);
@@ -184,14 +177,17 @@ void x_delay(int ms);
 //if a SLD_QUIT event was found, event receives X_EVENT_QUIT (0)
 //if a SDL_MOUSEBUTTONDOWN was found, event receives X_EVENT_LEFTCLICK (1) or X_EVENT_RIGHTCLICK (2)
 //if none of these events was found, event receives X_EVENT_NOTHING (-1)
-//if var event is no NULL, it is filled with event found
-int x_get_event(int * event);
+int x_get_event();
 
-//receive a SDLK_Key returns if the key is pressed
+//fill the event with the result of x_get_event and return true if an event was found
+bool x_poll_event(int * event);
+
+//receive a X_KEY_Key returns if the key is pressed
 bool x_is_key_pressed(int key);
 
 //returns the actual mouse position
-void x_get_mouse_pos(int * x, int * y);
+int x_get_mouse_x();
+int x_get_mouse_y();
 
 /*
 ###############################################
@@ -281,6 +277,17 @@ void x_fill_circle(int centerx, int centery, int radius);
 /* e ponto inferior direito (x1, y1) */
 void x_fill_ellipse(int x0, int y0, int x1, int y1);
 
+
+/*
+###############################################
+############ FUNÇÕES MATEMATICAS ##############
+###############################################
+*/
+
+double x_math_rad2deg(double rad);
+int    x_math_rand(int min, int max);
+
+
 /*
 ###############################################
 ############ FUNÇÕES DE GRID ##################
@@ -304,10 +311,318 @@ void x_grid_text(int l, int c, const char * text);
 /*writes a number until 5 char in cell*/
 void x_grid_number(int l, int c, int number);
 
-
 #endif //SDLHELP_H
 
+
+enum
+{
+    X_KEY_UNKNOWN = 0,
+
+    X_KEY_RETURN = '\r',
+    X_KEY_ESCAPE = '\033',
+    X_KEY_BACKSPACE = '\b',
+    X_KEY_TAB = '\t',
+    X_KEY_SPACE = ' ',
+    X_KEY_EXCLAIM = '!',
+    X_KEY_QUOTEDBL = '"',
+    X_KEY_HASH = '#',
+    X_KEY_PERCENT = '%',
+    X_KEY_DOLLAR = '$',
+    X_KEY_AMPERSAND = '&',
+    X_KEY_QUOTE = '\'',
+    X_KEY_LEFTPAREN = '(',
+    X_KEY_RIGHTPAREN = ')',
+    X_KEY_ASTERISK = '*',
+    X_KEY_PLUS = '+',
+    X_KEY_COMMA = ',',
+    X_KEY_MINUS = '-',
+    X_KEY_PERIOD = '.',
+    X_KEY_SLASH = '/',
+    X_KEY_0 = '0',
+    X_KEY_1 = '1',
+    X_KEY_2 = '2',
+    X_KEY_3 = '3',
+    X_KEY_4 = '4',
+    X_KEY_5 = '5',
+    X_KEY_6 = '6',
+    X_KEY_7 = '7',
+    X_KEY_8 = '8',
+    X_KEY_9 = '9',
+    X_KEY_COLON = ':',
+    X_KEY_SEMICOLON = ';',
+    X_KEY_LESS = '<',
+    X_KEY_EQUALS = '=',
+    X_KEY_GREATER = '>',
+    X_KEY_QUESTION = '?',
+    X_KEY_AT = '@',
+    /*
+       Skip uppercase letters
+     */
+    X_KEY_LEFTBRACKET = '[',
+    X_KEY_BACKSLASH = '\\',
+    X_KEY_RIGHTBRACKET = ']',
+    X_KEY_CARET = '^',
+    X_KEY_UNDERSCORE = '_',
+    X_KEY_BACKQUOTE = '`',
+    X_KEY_a = 'a',
+    X_KEY_b = 'b',
+    X_KEY_c = 'c',
+    X_KEY_d = 'd',
+    X_KEY_e = 'e',
+    X_KEY_f = 'f',
+    X_KEY_g = 'g',
+    X_KEY_h = 'h',
+    X_KEY_i = 'i',
+    X_KEY_j = 'j',
+    X_KEY_k = 'k',
+    X_KEY_l = 'l',
+    X_KEY_m = 'm',
+    X_KEY_n = 'n',
+    X_KEY_o = 'o',
+    X_KEY_p = 'p',
+    X_KEY_q = 'q',
+    X_KEY_r = 'r',
+    X_KEY_s = 's',
+    X_KEY_t = 't',
+    X_KEY_u = 'u',
+    X_KEY_v = 'v',
+    X_KEY_w = 'w',
+    X_KEY_x = 'x',
+    X_KEY_y = 'y',
+    X_KEY_z = 'z',
+
+    X_KEY_CAPSLOCK = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CAPSLOCK),
+
+    X_KEY_F1 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F1),
+    X_KEY_F2 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F2),
+    X_KEY_F3 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F3),
+    X_KEY_F4 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F4),
+    X_KEY_F5 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F5),
+    X_KEY_F6 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F6),
+    X_KEY_F7 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F7),
+    X_KEY_F8 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F8),
+    X_KEY_F9 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F9),
+    X_KEY_F10 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F10),
+    X_KEY_F11 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F11),
+    X_KEY_F12 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F12),
+
+    X_KEY_PRINTSCREEN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_PRINTSCREEN),
+    X_KEY_SCROLLLOCK = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_SCROLLLOCK),
+    X_KEY_PAUSE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_PAUSE),
+    X_KEY_INSERT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_INSERT),
+    X_KEY_HOME = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_HOME),
+    X_KEY_PAGEUP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_PAGEUP),
+    X_KEY_DELETE = '\177',
+    X_KEY_END = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_END),
+    X_KEY_PAGEDOWN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_PAGEDOWN),
+    X_KEY_RIGHT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_RIGHT),
+    X_KEY_LEFT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_LEFT),
+    X_KEY_DOWN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_DOWN),
+    X_KEY_UP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_UP),
+
+    X_KEY_NUMLOCKCLEAR = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_NUMLOCKCLEAR),
+    X_KEY_KP_DIVIDE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_DIVIDE),
+    X_KEY_KP_MULTIPLY = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MULTIPLY),
+    X_KEY_KP_MINUS = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MINUS),
+    X_KEY_KP_PLUS = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_PLUS),
+    X_KEY_KP_ENTER = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_ENTER),
+    X_KEY_KP_1 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_1),
+    X_KEY_KP_2 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_2),
+    X_KEY_KP_3 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_3),
+    X_KEY_KP_4 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_4),
+    X_KEY_KP_5 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_5),
+    X_KEY_KP_6 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_6),
+    X_KEY_KP_7 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_7),
+    X_KEY_KP_8 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_8),
+    X_KEY_KP_9 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_9),
+    X_KEY_KP_0 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_0),
+    X_KEY_KP_PERIOD = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_PERIOD),
+
+    X_KEY_APPLICATION = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_APPLICATION),
+    X_KEY_POWER = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_POWER),
+    X_KEY_KP_EQUALS = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_EQUALS),
+    X_KEY_F13 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F13),
+    X_KEY_F14 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F14),
+    X_KEY_F15 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F15),
+    X_KEY_F16 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F16),
+    X_KEY_F17 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F17),
+    X_KEY_F18 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F18),
+    X_KEY_F19 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F19),
+    X_KEY_F20 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F20),
+    X_KEY_F21 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F21),
+    X_KEY_F22 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F22),
+    X_KEY_F23 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F23),
+    X_KEY_F24 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_F24),
+    X_KEY_EXECUTE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_EXECUTE),
+    X_KEY_HELP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_HELP),
+    X_KEY_MENU = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_MENU),
+    X_KEY_SELECT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_SELECT),
+    X_KEY_STOP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_STOP),
+    X_KEY_AGAIN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AGAIN),
+    X_KEY_UNDO = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_UNDO),
+    X_KEY_CUT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CUT),
+    X_KEY_COPY = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_COPY),
+    X_KEY_PASTE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_PASTE),
+    X_KEY_FIND = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_FIND),
+    X_KEY_MUTE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_MUTE),
+    X_KEY_VOLUMEUP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_VOLUMEUP),
+    X_KEY_VOLUMEDOWN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_VOLUMEDOWN),
+    X_KEY_KP_COMMA = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_COMMA),
+    X_KEY_KP_EQUALSAS400 =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_EQUALSAS400),
+
+    X_KEY_ALTERASE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_ALTERASE),
+    X_KEY_SYSREQ = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_SYSREQ),
+    X_KEY_CANCEL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CANCEL),
+    X_KEY_CLEAR = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CLEAR),
+    X_KEY_PRIOR = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_PRIOR),
+    X_KEY_RETURN2 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_RETURN2),
+    X_KEY_SEPARATOR = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_SEPARATOR),
+    X_KEY_OUT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_OUT),
+    X_KEY_OPER = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_OPER),
+    X_KEY_CLEARAGAIN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CLEARAGAIN),
+    X_KEY_CRSEL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CRSEL),
+    X_KEY_EXSEL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_EXSEL),
+
+    X_KEY_KP_00 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_00),
+    X_KEY_KP_000 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_000),
+    X_KEY_THOUSANDSSEPARATOR =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_THOUSANDSSEPARATOR),
+    X_KEY_DECIMALSEPARATOR =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_DECIMALSEPARATOR),
+    X_KEY_CURRENCYUNIT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CURRENCYUNIT),
+    X_KEY_CURRENCYSUBUNIT =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CURRENCYSUBUNIT),
+    X_KEY_KP_LEFTPAREN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_LEFTPAREN),
+    X_KEY_KP_RIGHTPAREN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_RIGHTPAREN),
+    X_KEY_KP_LEFTBRACE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_LEFTBRACE),
+    X_KEY_KP_RIGHTBRACE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_RIGHTBRACE),
+    X_KEY_KP_TAB = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_TAB),
+    X_KEY_KP_BACKSPACE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_BACKSPACE),
+    X_KEY_KP_A = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_A),
+    X_KEY_KP_B = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_B),
+    X_KEY_KP_C = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_C),
+    X_KEY_KP_D = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_D),
+    X_KEY_KP_E = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_E),
+    X_KEY_KP_F = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_F),
+    X_KEY_KP_XOR = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_XOR),
+    X_KEY_KP_POWER = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_POWER),
+    X_KEY_KP_PERCENT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_PERCENT),
+    X_KEY_KP_LESS = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_LESS),
+    X_KEY_KP_GREATER = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_GREATER),
+    X_KEY_KP_AMPERSAND = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_AMPERSAND),
+    X_KEY_KP_DBLAMPERSAND =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_DBLAMPERSAND),
+    X_KEY_KP_VERTICALBAR =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_VERTICALBAR),
+    X_KEY_KP_DBLVERTICALBAR =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_DBLVERTICALBAR),
+    X_KEY_KP_COLON = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_COLON),
+    X_KEY_KP_HASH = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_HASH),
+    X_KEY_KP_SPACE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_SPACE),
+    X_KEY_KP_AT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_AT),
+    X_KEY_KP_EXCLAM = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_EXCLAM),
+    X_KEY_KP_MEMSTORE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MEMSTORE),
+    X_KEY_KP_MEMRECALL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MEMRECALL),
+    X_KEY_KP_MEMCLEAR = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MEMCLEAR),
+    X_KEY_KP_MEMADD = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MEMADD),
+    X_KEY_KP_MEMSUBTRACT =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MEMSUBTRACT),
+    X_KEY_KP_MEMMULTIPLY =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MEMMULTIPLY),
+    X_KEY_KP_MEMDIVIDE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_MEMDIVIDE),
+    X_KEY_KP_PLUSMINUS = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_PLUSMINUS),
+    X_KEY_KP_CLEAR = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_CLEAR),
+    X_KEY_KP_CLEARENTRY = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_CLEARENTRY),
+    X_KEY_KP_BINARY = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_BINARY),
+    X_KEY_KP_OCTAL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_OCTAL),
+    X_KEY_KP_DECIMAL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_DECIMAL),
+    X_KEY_KP_HEXADECIMAL =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KP_HEXADECIMAL),
+
+    X_KEY_LCTRL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_LCTRL),
+    X_KEY_LSHIFT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_LSHIFT),
+    X_KEY_LALT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_LALT),
+    X_KEY_LGUI = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_LGUI),
+    X_KEY_RCTRL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_RCTRL),
+    X_KEY_RSHIFT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_RSHIFT),
+    X_KEY_RALT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_RALT),
+    X_KEY_RGUI = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_RGUI),
+
+    X_KEY_MODE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_MODE),
+
+    X_KEY_AUDIONEXT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AUDIONEXT),
+    X_KEY_AUDIOPREV = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AUDIOPREV),
+    X_KEY_AUDIOSTOP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AUDIOSTOP),
+    X_KEY_AUDIOPLAY = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AUDIOPLAY),
+    X_KEY_AUDIOMUTE = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AUDIOMUTE),
+    X_KEY_MEDIASELECT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_MEDIASELECT),
+    X_KEY_WWW = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_WWW),
+    X_KEY_MAIL = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_MAIL),
+    X_KEY_CALCULATOR = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_CALCULATOR),
+    X_KEY_COMPUTER = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_COMPUTER),
+    X_KEY_AC_SEARCH = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AC_SEARCH),
+    X_KEY_AC_HOME = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AC_HOME),
+    X_KEY_AC_BACK = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AC_BACK),
+    X_KEY_AC_FORWARD = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AC_FORWARD),
+    X_KEY_AC_STOP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AC_STOP),
+    X_KEY_AC_REFRESH = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AC_REFRESH),
+    X_KEY_AC_BOOKMARKS = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AC_BOOKMARKS),
+
+    X_KEY_BRIGHTNESSDOWN =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_BRIGHTNESSDOWN),
+    X_KEY_BRIGHTNESSUP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_BRIGHTNESSUP),
+    X_KEY_DISPLAYSWITCH = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_DISPLAYSWITCH),
+    X_KEY_KBDILLUMTOGGLE =
+        SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KBDILLUMTOGGLE),
+    X_KEY_KBDILLUMDOWN = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KBDILLUMDOWN),
+    X_KEY_KBDILLUMUP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_KBDILLUMUP),
+    X_KEY_EJECT = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_EJECT),
+    X_KEY_SLEEP = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_SLEEP),
+    X_KEY_APP1 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_APP1),
+    X_KEY_APP2 = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_APP2),
+
+    X_KEY_AUDIOREWIND = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AUDIOREWIND),
+    X_KEY_AUDIOFASTFORWARD = SDL_SCANCODE_TO_KEYCODE(SDL_SCANCODE_AUDIOFASTFORWARD)
+};
+
+//#########################################################################################
+
 #ifdef X_FULL
+
+//finalizes the sdl and all resources allocated
+void x_close();
+void x_display();
+
+#ifdef X_AUTO
+void setup();
+void handle(int event);
+void update();
+
+int main(){
+    setup();
+    bool is_open = true;
+    int timer = 0;
+    while(is_open){
+        if(!x_time_elapsed(&timer, 10))
+            continue;
+        int event;
+        while(x_poll_event(&event)){
+            if(event == X_EVENT_QUIT)
+                is_open = false;
+            else
+                handle(event);
+        }
+        update();
+        x_display();
+    }
+    x_close();
+}
+#endif //endif X_EASY
+
+
+
+
 
 SDL_Window * x_window; //janela
 SDL_Renderer * x_renderer; //renderizador do buffer
@@ -318,7 +633,9 @@ TTF_Font  * x_arr_fonts[X_MAX_ITENS][X_MAX_ITENS];//fonts x font_size
 X_Sprite  * x_arr_sprites[X_MAX_ITENS];
 Mix_Chunk * x_arr_chunks[X_MAX_ITENS];
 Mix_Music * x_arr_musics[X_MAX_ITENS];
-X_Color     x_arr_colors[256];
+
+X_ColorEntry x_arr_colors[X_MAX_ITENS];
+int x_arr_colors_size = 0;
 
 int x_window_width = 800;
 int x_window_height = 600;
@@ -334,27 +651,156 @@ const X_Color X_COLOR_MAGENTA   = {211, 54 , 130, 255};
 const X_Color X_COLOR_ORANGE    = {253, 106,   2, 255};
 const X_Color X_COLOR_VIOLET    = {108, 113, 196, 255};
 
-void x_set_color(X_Color color){
-    SDL_SetRenderDrawColor(x_renderer, color.r, color.g, color.b, color.a);
+bool __x_validate_hex(const char * color){
+    for(int i = 1; i < 7; i++){
+        if(color[i] >= '0' && color[i] <= '9')
+            continue;
+        else if(color[i] >= 'a' && color[i] <= 'f')
+            continue;
+        else
+            return false;
+    }
+    return true;
 }
 
-void x_set_pcolor(Uint8 color){
-    x_set_color(x_arr_colors[color]);
+bool __x_decode_hex(const char * _color, X_Color * xc){
+    if(strlen(_color) != 7 || _color[0] != '#')
+        return false;
+    char color[8];
+    strcpy(color, _color);
+    for(int i = 1; i < 7; i++)
+        color[i] = tolower(_color[i]);
+    if(!__x_validate_hex(color))
+        return false;
+    unsigned int r, g, b;
+    int readings = sscanf(color + 1, "%02x%02x%02x", &r, &g, &b);
+    if(readings != 3)
+        return false;
+    *xc = (X_Color){r, g, b, 255};
+    return true;
+}
+
+int __x_count_colon(const char * color){
+    int cont = 0;
+    int size = strlen(color);
+    for(int i = 0; i < size; i++)
+        if(color[i] == ',')
+            cont += 1;
+    return cont;
+}
+
+bool __x_decode_rgba(const char * color, X_Color * xc){
+    int number_of_colons = __x_count_colon(color);
+    if(number_of_colons != 2 && number_of_colons != 3)
+        return false;
+    char decode[4][4] = {"", "", "", ""};
+    int  idecode[4];
+    int ind = 0;
+    int size = strlen(color);
+    for(int i = 0; i < size; i++){
+        if(color[i] == ',')
+            ind += 1;
+        else if(color[i] == ' ')
+            continue;
+        else if((color[i] >= '0') && (color[i] <= '9')){
+            char str[2] = "x";
+            str[0] = color[i];
+            strcat(decode[ind], str);
+        }
+        else{
+            return false;
+        }
+    }
+    if(ind == 2)
+        strcpy(decode[3], "255");
+    for(int i = 0; i < 4; i++)
+        idecode[i] = atoi(decode[i]);
+    xc->r = idecode[0];
+    xc->g = idecode[1];
+    xc->b = idecode[2];
+    xc->a = idecode[3];
+    for(int i = 0; i < 4; i++){
+        if((idecode[i] < 0) || (idecode[i] > 255))
+            printf("warning: a rgb color should be inside the interval [0, 255]: %d\n", idecode[i]);
+    }
+    
+    return true;
+}
+
+bool __x_color_load(const char * color, X_Color * xc){
+    for(int i = 0; i < x_arr_colors_size; i++){
+        if(strcmp(x_arr_colors[i].key, color) == 0){
+            *xc = x_arr_colors[i].color;
+            return true;
+        }
+    }
+    return false;
+}
+
+void x_color_add(const char * entry, X_Color color){
+    if(x_arr_colors_size < X_MAX_ITENS){
+        strcpy(x_arr_colors[x_arr_colors_size].key, entry);
+        x_arr_colors[x_arr_colors_size].color = color;
+        x_arr_colors_size += 1;
+    }
+}
+
+void __x_init_colors(){
+    x_color_add("w", X_COLOR_WHITE);
+    x_color_add("white", X_COLOR_WHITE);
+    x_color_add("k", X_COLOR_BLACK);
+    x_color_add("black", X_COLOR_BLACK);
+    x_color_add("g", X_COLOR_GREEN);
+    x_color_add("green", X_COLOR_GREEN);
+    x_color_add("r", X_COLOR_RED);
+    x_color_add("red", X_COLOR_RED);
+    x_color_add("b", X_COLOR_BLUE);
+    x_color_add("blue", X_COLOR_BLUE);
+    x_color_add("y", X_COLOR_YELLOW);
+    x_color_add("yellow", X_COLOR_YELLOW);
+    x_color_add("c", X_COLOR_CYAN);
+    x_color_add("cyan", X_COLOR_CYAN);
+    x_color_add("m", X_COLOR_MAGENTA);
+    x_color_add("magenta", X_COLOR_MAGENTA);
+    x_color_add("o", X_COLOR_ORANGE);
+    x_color_add("orange", X_COLOR_ORANGE);
+    x_color_add("v", X_COLOR_VIOLET);
+    x_color_add("violet", X_COLOR_VIOLET);
+    // TODO
+    // gray, purple, golden, silver, charcoal, pink, lime
+
+    x_color_add(" ", x_make_color(230, 230, 250, 255)); /*khaki*/
+    x_color_add(".", x_make_color(240, 230, 140, 255)); /*lavender*/
+    x_color_add("#", x_make_color(25, 25, 112, 255)); /*midnight blue*/
+    x_color_add("x", x_make_color(255, 99, 71, 255)); /*tomato*/
+
+}
+
+void x_color_show(X_Color color){
+    printf("{%3d, %3d, %3d, %3d}\n", color.r, color.g, color.b, color.a);
+}
+
+X_Color x_color_decode(const char * color){
+    X_Color xc;
+    if(__x_decode_rgba(color, &xc) || __x_decode_hex(color, &xc) || __x_color_load(color, &xc))
+        return xc;
+    printf("fail: Color \"%s\" could not be decoded\n", color);
+    return xc;
+}
+
+void x_set_color(const char * color){
+    X_Color xc = x_color_decode(color);
+    SDL_SetRenderDrawColor(x_renderer, xc.r, xc.g, xc.b, xc.a);
+}
+
+void x_set_color_rgba(Uint8 r, Uint8 g, Uint8 b, Uint8 a){
+    SDL_SetRenderDrawColor(x_renderer, r, g, b, a);
 }
 
 X_Color x_get_color(){
     X_Color color;
     SDL_GetRenderDrawColor(x_renderer, &color.r, &color.g, &color.b, &color.a);
     return color;
-}
-
-
-void x_set_palette(Uint8 color, int r, int g, int b, int a){
-    x_arr_colors[color] = x_make_color(r, g, b, a);
-}
-
-X_Color x_get_palette(Uint8 color){
-    return x_arr_colors[color];
 }
 
 bool x_is_key_pressed(int key){
@@ -368,8 +814,18 @@ bool x_is_key_pressed(int key){
     return keyboard[key];
 }
 
-void x_get_mouse_pos(int * x, int * y){
-    SDL_GetMouseState(x, y);
+int x_get_mouse_x(){
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    (void) y;
+    return x;
+}
+
+int x_get_mouse_y(){
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    (void) x;
+    return y;
 }
 
 bool x_poll_event(int * event){
@@ -397,11 +853,9 @@ bool x_poll_event(int * event){
     return false;
 }
 
-int x_get_event(int * event){
+int x_get_event(){
     int ev;
     x_poll_event(&ev);
-    if(event != NULL)
-        *event = ev;
     return ev;
 }
 
@@ -426,27 +880,7 @@ void x_open(int width, int height, const char * title){
     TTF_Init();
     x_set_font_size(__x_current_font_size);
 
-    for(int i = 0; i < 256; i++)
-        x_arr_colors[i] = x_make_color(255, 255, 255, 255);
-
-    x_arr_colors['r'] = X_COLOR_RED;
-    x_arr_colors['g'] = X_COLOR_GREEN;
-    x_arr_colors['b'] = X_COLOR_BLUE;
-    x_arr_colors['y'] = X_COLOR_YELLOW;
-    x_arr_colors['m'] = X_COLOR_MAGENTA;
-    x_arr_colors['c'] = X_COLOR_CYAN;
-    x_arr_colors['k'] = X_COLOR_BLACK;
-    x_arr_colors['w'] = X_COLOR_WHITE;
-    x_arr_colors['o'] = X_COLOR_ORANGE;
-    x_arr_colors['v'] = X_COLOR_VIOLET;
-
-    /*https://htmlcolorcodes.com/color-names/*/
-
-    x_arr_colors[' '] = x_make_color(230, 230, 250, 255); /*khaki*/
-    x_arr_colors['.'] = x_make_color(240, 230, 140, 255); /*lavender*/
-    x_arr_colors['#'] = x_make_color(25, 25, 112, 255); /*midnight blue*/
-    x_arr_colors['x'] = x_make_color(255, 99, 71, 255); /*tomato*/
-
+    __x_init_colors();
     srand(time(NULL));
 }
 
@@ -565,7 +999,7 @@ int  x_load_sprite(const char * path, int nl, int nc, int width, int height){
     return index;
 }
 
-bool x_timer(int * timer, int ms){
+bool x_time_elapsed(int * timer, int ms){
     int clock = SDL_GetTicks();
     if(clock - (*timer) > ms){
         *timer = clock;
@@ -1062,6 +1496,15 @@ void x_fill_arc(float centerx, float centery, int radius, int thickness, int deg
     }
     
 }
+
+double x_math_deg2rad(double deg){
+    return (deg * (3.14159265358979323846/180.0));
+}
+
+int   x_math_rand(int min, int max){
+    return rand() % (max + 1 - min) + min;
+}
+
 
 int __x_GRID_SIDE = 50;
 int __x_GRID_SEP = 1;

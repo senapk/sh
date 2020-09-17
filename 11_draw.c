@@ -4,14 +4,14 @@
 int main(){
     x_open(1000, 600, "desenho");
     x_set_font_size(18);
-    while(x_get_event(NULL)){
-        x_set_pcolor('k');
+    while(x_get_event()){
+        x_set_color("k");
         x_clear();
         /* cada exemplo vai ser apresentado num espaço de 200x200 pixels */
-        x_set_pcolor('g');
+        x_set_color("g");
         x_write(30, 30, "Exemplo das funcoes de desenho de formas geometricas");
 
-        x_set_pcolor('w');
+        x_set_color("w");
         int x = 10;
         int y = 100;
         x_write(x, y, "xd_line");
